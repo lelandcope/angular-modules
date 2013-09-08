@@ -10,7 +10,7 @@ lcTouch = angular.module 'lcTouch', []
 	- ngTap - {string} - An expression representing what you would like to do when the element is tapped or clicked
 
 	Usage:
-	<button type="button" lc-tap="doSomething()">Click Me</button>
+	<button type="button" ng-tap="doSomething()">Click Me</button>
 ###
 
 lcTouch.directive 'ngTap', ($timeout)->
@@ -55,3 +55,50 @@ lcTouch.directive 'ngTap', ($timeout)->
 		elem.bind 'click', ()->
 			unless tapped
 				scope.$apply attrs["ngTap"]
+
+
+###
+	ngTapOutside
+
+	Description: A directive that listens when a user clicks or taps
+	outside the area.
+
+	Usage:
+	<button type="button" ng-tap-outside="closeDropdown()">Show Dropdown</button>
+###
+
+lcTouch.directive 'ngTapOutside', ($timeout)->
+	(scope, elem, attrs)->
+		stopEvent = false
+
+		if angular.isDefined attrs.when
+			scope.$watch attrs.when, (newValue, oldValue)->
+				if newValue is true
+					$timeout ()->
+						elem.bind 'touchstart click', onElementTouchStart
+						$('html').bind 'touchend click', onTouchEnd
+				else
+					elem.unbind 'touchstart click', onElementTouchStart
+					$('html').unbind 'touchend click', onTouchEnd
+		else
+			elem.bind 'touchstart click', onElementTouchStart
+			$('html').bind 'touchend click', onTouchEnd
+
+
+		# JS Functions
+		onTouchEnd = (event)->
+			unless stopEvent
+				$timeout ()->
+					scope.$eval attrs.ngTapOutside
+				, 10
+			else
+				stopEvent = false
+
+		onElementTouchStart = (event)->
+			event.stopPropagation()
+
+
+		# Event Listeners
+		scope.$on 'event:stopTapOutside', ()->
+			stopEvent = true
+
