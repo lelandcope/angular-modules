@@ -15,6 +15,7 @@ This will build a normal version and a minified version of the module and place 
 
 ### Directives List
 [ngTap](#ngtap) - Adds tap support with a fallback to clicks for desktop browsers
+
 [ngTapOutside](#ngtapoutside) - Adds tap support for when a user taps or clicks outside a designated area
 
 ---------------
