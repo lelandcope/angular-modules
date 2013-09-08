@@ -12,11 +12,11 @@ grunt build
 This will build a normal version and a minified version of the module and place it in the dist folder.
 
 ### Directives List
-[lcTap](#lcTap) - Adds tap support with a fallback to clicks for desktop browsers
+[ngTap](#ngTap) - Adds tap support with a fallback to clicks for desktop browsers
 
 ---------------
 
-## lcTap
+## ngTap
 
 Adds tap support with a fallback to clicks for desktop browsers
 
@@ -30,4 +30,4 @@ Restricted to: Attribute
 
 ### Parameters:
 
-- lcTap - {string} - An expression representing what you would like to do when the element is tapped or clicked
+- ngTap - {string} - An expression representing what you would like to do when the element is tapped or clicked

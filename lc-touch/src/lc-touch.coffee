@@ -1,19 +1,19 @@
 lcTouch = angular.module 'lcTouch', []
 
 ###
-	lcTap Directive
+	ngTap Directive
 
 	Description: A replacement for ngClick. This directive will take into account taps and clicks so it
 	will work for both mobile and desktop browsers.
 
 	Parameters:
-	- lcTap - {string} - An expression representing what you would like to do when the element is tapped or clicked
+	- ngTap - {string} - An expression representing what you would like to do when the element is tapped or clicked
 
 	Usage:
 	<button type="button" lc-tap="doSomething()">Click Me</button>
 ###
 
-lcTouch.directive 'lcTap', ($timeout)->
+lcTouch.directive 'ngTap', ($timeout)->
 	(scope, elem, attrs)->
 		distanceThreshold    = 25
 		timeThreshold        = 500
@@ -36,7 +36,7 @@ lcTouch.directive 'lcTap', ($timeout)->
 
 				if target is endEvent.target
 					tapped = true
-					scope.$apply attrs["lcTap"]
+					scope.$apply attrs["ngTap"]
 
 			moveHandler = (moveEvent)->
 				touchMove  = moveEvent.originalEvent.touches[0]
@@ -54,4 +54,4 @@ lcTouch.directive 'lcTap', ($timeout)->
 
 		elem.bind 'click', ()->
 			unless tapped
-				scope.$apply attrs["lcTap"]
+				scope.$apply attrs["ngTap"]
