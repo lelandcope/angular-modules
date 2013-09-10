@@ -1,7 +1,7 @@
 /*! 
- lcTouch v0.0.5 
+ lcTouch v0.0.6 
  Author: Leland Cope @lelandcope 
- 2013-09-08 
+ 2013-09-09 
  */
 
 var lcTouch;
@@ -106,7 +106,8 @@ lcTouch.directive("ngTapOutside", function($timeout) {
             }
         };
         onElementTouchStart = function(event) {
-            return event.stopPropagation();
+            event.stopPropagation();
+            return stopEvent = true;
         };
         return scope.$on("event:stopTapOutside", function() {
             return stopEvent = true;

@@ -96,6 +96,7 @@ lcTouch.directive 'ngTapOutside', ($timeout)->
 
 		onElementTouchStart = (event)->
 			event.stopPropagation()
+			stopEvent = true
 
 
 		# Event Listeners
