@@ -21,10 +21,20 @@ Restricted to: Attribute
 
 ### Usage:
 
+HTML
 <pre>
-&lt;div infinite-scroll="getMore()" infinite-scroll-threshold="200">
+&lt;div infinite-scroll="getMore()" infinite-scroll-threshold="200" style="overflow: hidden; overflow-y: scroll;">
+    &lt;div>
+        ...... Content .....
+    &lt;/div>
+&lt;/div>
+</pre>
 
-&lt;/div
+JS
+<pre>
+$scope.getMore = function() {
+    
+}
 </pre>
 
 ### Parameters:
