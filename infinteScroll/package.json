@@ -1,0 +1,17 @@
+{
+  "name": "infinteScroll",
+  "version": "0.0.1",
+  "description": "Infinite Scroll Module for Angular JS",
+  "main": "infiniteScroll.js",
+  "scripts": {
+    "test": " "
+  },
+  "repository": "",
+  "author": "Leland Cope @lelandcope",
+  "license": "BSD",
+  "dependencies": {
+    "grunt": "~0.4.1",
+    "grunt-contrib-coffee": "~0.7.0",
+    "grunt-contrib-uglify": "~0.2.4"
+  }
+}
