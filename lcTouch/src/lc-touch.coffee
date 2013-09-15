@@ -13,7 +13,7 @@ lcTouch = angular.module 'lcTouch', []
 	<button type="button" ng-tap="doSomething()">Click Me</button>
 ###
 
-lcTouch.directive 'ngTap', ($timeout)->
+lcTouch.directive 'ngTap', ['$timeout', ($timeout)->
 	(scope, elem, attrs)->
 		distanceThreshold    = 25
 		timeThreshold        = 500
@@ -55,6 +55,7 @@ lcTouch.directive 'ngTap', ($timeout)->
 		elem.bind 'click', ()->
 			unless tapped
 				scope.$apply attrs["ngTap"]
+]
 
 
 ###
@@ -67,7 +68,7 @@ lcTouch.directive 'ngTap', ($timeout)->
 	<button type="button" ng-tap-outside="closeDropdown()">Show Dropdown</button>
 ###
 
-lcTouch.directive 'ngTapOutside', ($timeout)->
+lcTouch.directive 'ngTapOutside', ['$timeout', ($timeout)->
 	(scope, elem, attrs)->
 		stopEvent = false
 
@@ -102,4 +103,4 @@ lcTouch.directive 'ngTapOutside', ($timeout)->
 		# Event Listeners
 		scope.$on 'event:stopTapOutside', ()->
 			stopEvent = true
-
+]

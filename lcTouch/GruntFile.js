@@ -22,7 +22,7 @@ module.exports = function(grunt) {
 
 			normal: {
 				options: {
-					mangle: false,
+					mangle: true,
 					beautify: true,
 					compress: false,
 					wrap: false,
@@ -36,9 +36,9 @@ module.exports = function(grunt) {
 
 			min: {
 				options: {
-					mangle: true,
+					mangle: false,
 					compress: true,
-					wrap: false,
+					wrap: true,
 					preserveComments: false
 				},
 
