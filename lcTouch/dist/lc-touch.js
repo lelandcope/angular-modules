@@ -1,7 +1,7 @@
 /*! 
  lcTouch v0.0.6 
  Author: Leland Cope @lelandcope 
- 2013-09-09 
+ 2013-09-15 
  */
 
 var lcTouch;

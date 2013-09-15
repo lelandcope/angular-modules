@@ -35,6 +35,13 @@ module.exports = function(grunt) {
 			},
 
 			min: {
+				options: {
+					mangle: true,
+					compress: true,
+					wrap: false,
+					preserveComments: false
+				},
+
 				files: {
 					'dist/lc-touch.min.js': 'dist/lc-touch.js'
 				}
