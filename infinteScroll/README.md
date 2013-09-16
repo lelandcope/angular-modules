@@ -23,9 +23,9 @@ Restricted to: Attribute
 
 HTML
 <pre>
-&lt;div infinite-scroll="getMore()" infinite-scroll-threshold="200" style="overflow: hidden; overflow-y: scroll;">
+&lt;div infinite-scroll="getMore()" infinite-scroll-threshold="200" infinite-scroll-disabled="disableInfiniteScroll" style="overflow: hidden; overflow-y: scroll;">
     &lt;div>
-        ...... Content .....
+        ...... Content ......
     &lt;/div>
 &lt;/div>
 </pre>
@@ -33,7 +33,12 @@ HTML
 JS
 <pre>
 $scope.getMore = function() {
+	$scope.disableInfiniteScroll = true;
     
+    $http.get('/some/path', {}).then(function(response) {
+    	...... Add Items to the dom or $scope vars array ......
+        $scope.disableInfiniteScroll = false;
+    });
 }
 </pre>
 
