@@ -1,12 +1,13 @@
 {
   "name": "infinteScroll",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Infinite Scroll Module for Angular JS",
   "main": "infiniteScroll.js",
   "scripts": {
     "test": " "
   },
   "repository": "",
+  "url": "https://github.com/lelandcope/angular-modules/tree/master/infinteScroll",
   "author": "Leland Cope @lelandcope",
   "license": "BSD",
   "dependencies": {

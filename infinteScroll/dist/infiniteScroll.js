@@ -1,7 +1,8 @@
 /*! 
- infinteScroll v0.0.2 
+ infinteScroll v0.0.3 
  Author: Leland Cope @lelandcope 
- 2013-09-17 
+ URL: https://github.com/lelandcope/angular-modules/tree/master/infinteScroll 
+ 2013-09-18 
  */
 
 "use strict";

@@ -17,7 +17,7 @@ module.exports = function(grunt) {
 
 		uglify: {
 			options: {
-				banner: "/*! \r\n <%= pkg.name %> v<%= pkg.version %> \r\n Author: <%= pkg.author %> \r\n <%= grunt.template.today('yyyy-mm-dd') %> \r\n */\r\n\r\n"
+				banner: "/*! \r\n <%= pkg.name %> v<%= pkg.version %> \r\n Author: <%= pkg.author %> \r\n URL: <%= pkg.url %> \r\n <%= grunt.template.today('yyyy-mm-dd') %> \r\n */\r\n\r\n"
 			},
 
 			normal: {
