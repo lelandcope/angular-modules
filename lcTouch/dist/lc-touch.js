@@ -40,7 +40,6 @@ lcTouch.directive("ngTap", [ "$timeout", function($timeout) {
             tapHandler = function(endEvent) {
                 endEvent.preventDefault();
                 removeTapHandler();
-                alert(target === endEvent.target);
                 if (target === endEvent.target) {
                     tapped = true;
                     return scope.$apply(attrs["ngTap"]);
