@@ -25,7 +25,7 @@ lcTouch.directive 'ngTap', ['$timeout', ($timeout)->
 			startX      = touchStart.pageX
 			startY      = touchStart.pageY
 
-			removeHandler = ()->
+			removeTapHandler = ()->
 				$timeout.cancel()
 				elem.off 'touchmove', moveHandler
 				elem.off 'touchend', tapHandler
@@ -33,6 +33,8 @@ lcTouch.directive 'ngTap', ['$timeout', ($timeout)->
 			tapHandler = (endEvent)->
 				endEvent.preventDefault()
 				removeTapHandler()
+
+				alert target is endEvent.target
 
 				if target is endEvent.target
 					tapped = true

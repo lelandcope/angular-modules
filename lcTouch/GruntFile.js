@@ -22,7 +22,7 @@ module.exports = function(grunt) {
 
 			normal: {
 				options: {
-					mangle: true,
+					mangle: false,
 					beautify: true,
 					compress: false,
 					wrap: false,

@@ -1,7 +1,7 @@
 /*! 
- lcTouch v0.0.7 
+ lcTouch v0.0.8 
  Author: Leland Cope @lelandcope 
- 2013-09-15 
+ 2013-09-17 
  */
 
 var lcTouch;
@@ -20,48 +20,49 @@ lcTouch = angular.module("lcTouch", []);
 	Usage:
 	<button type="button" ng-tap="doSomething()">Click Me</button>
 */
-lcTouch.directive("ngTap", [ "$timeout", function(a) {
-    return function(b, c, d) {
-        var e, f, g;
-        e = 25;
-        g = 500;
-        f = false;
-        c.on("touchstart", function(h) {
-            var i, j, k, l, m, n, o;
-            n = h.target;
-            o = h.originalEvent.touches[0];
-            k = o.pageX;
-            l = o.pageY;
-            j = function() {
-                a.cancel();
-                c.off("touchmove", i);
-                return c.off("touchend", m);
+lcTouch.directive("ngTap", [ "$timeout", function($timeout) {
+    return function(scope, elem, attrs) {
+        var distanceThreshold, tapped, timeThreshold;
+        distanceThreshold = 25;
+        timeThreshold = 500;
+        tapped = false;
+        elem.on("touchstart", function(startEvent) {
+            var moveHandler, removeTapHandler, startX, startY, tapHandler, target, touchStart;
+            target = startEvent.target;
+            touchStart = startEvent.originalEvent.touches[0];
+            startX = touchStart.pageX;
+            startY = touchStart.pageY;
+            removeTapHandler = function() {
+                $timeout.cancel();
+                elem.off("touchmove", moveHandler);
+                return elem.off("touchend", tapHandler);
             };
-            m = function(a) {
-                a.preventDefault();
+            tapHandler = function(endEvent) {
+                endEvent.preventDefault();
                 removeTapHandler();
-                if (n === a.target) {
-                    f = true;
-                    return b.$apply(d["ngTap"]);
+                alert(target === endEvent.target);
+                if (target === endEvent.target) {
+                    tapped = true;
+                    return scope.$apply(attrs["ngTap"]);
                 }
             };
-            i = function(a) {
-                var b, c, d;
-                d = a.originalEvent.touches[0];
-                b = d.pageX;
-                c = d.pageY;
-                if (Math.abs(b - k) > e || Math.abs(c - l) > e) {
-                    f = true;
+            moveHandler = function(moveEvent) {
+                var moveX, moveY, touchMove;
+                touchMove = moveEvent.originalEvent.touches[0];
+                moveX = touchMove.pageX;
+                moveY = touchMove.pageY;
+                if (Math.abs(moveX - startX) > distanceThreshold || Math.abs(moveY - startY) > distanceThreshold) {
+                    tapped = true;
                     return removeTapHandler();
                 }
             };
-            a(removeTapHandler, g);
-            c.on("touchmove", i);
-            return c.on("touchend", m);
+            $timeout(removeTapHandler, timeThreshold);
+            elem.on("touchmove", moveHandler);
+            return elem.on("touchend", tapHandler);
         });
-        return c.bind("click", function() {
-            if (!f) {
-                return b.$apply(d["ngTap"]);
+        return elem.bind("click", function() {
+            if (!tapped) {
+                return scope.$apply(attrs["ngTap"]);
             }
         });
     };
@@ -76,41 +77,41 @@ lcTouch.directive("ngTap", [ "$timeout", function(a) {
 	Usage:
 	<button type="button" ng-tap-outside="closeDropdown()">Show Dropdown</button>
 */
-lcTouch.directive("ngTapOutside", [ "$timeout", function(a) {
-    return function(b, c, d) {
-        var e, f, g;
-        g = false;
-        if (angular.isDefined(d.when)) {
-            b.$watch(d.when, function(b, d) {
-                if (b === true) {
-                    return a(function() {
-                        c.bind("touchstart click", e);
-                        return $("html").bind("touchend click", f);
+lcTouch.directive("ngTapOutside", [ "$timeout", function($timeout) {
+    return function(scope, elem, attrs) {
+        var onElementTouchStart, onTouchEnd, stopEvent;
+        stopEvent = false;
+        if (angular.isDefined(attrs.when)) {
+            scope.$watch(attrs.when, function(newValue, oldValue) {
+                if (newValue === true) {
+                    return $timeout(function() {
+                        elem.bind("touchstart click", onElementTouchStart);
+                        return $("html").bind("touchend click", onTouchEnd);
                     });
                 } else {
-                    c.unbind("touchstart click", e);
-                    return $("html").unbind("touchend click", f);
+                    elem.unbind("touchstart click", onElementTouchStart);
+                    return $("html").unbind("touchend click", onTouchEnd);
                 }
             });
         } else {
-            c.bind("touchstart click", e);
-            $("html").bind("touchend click", f);
+            elem.bind("touchstart click", onElementTouchStart);
+            $("html").bind("touchend click", onTouchEnd);
         }
-        f = function(c) {
-            if (!g) {
-                return a(function() {
-                    return b.$eval(d.ngTapOutside);
+        onTouchEnd = function(event) {
+            if (!stopEvent) {
+                return $timeout(function() {
+                    return scope.$eval(attrs.ngTapOutside);
                 }, 10);
             } else {
-                return g = false;
+                return stopEvent = false;
             }
         };
-        e = function(a) {
-            a.stopPropagation();
-            return g = true;
+        onElementTouchStart = function(event) {
+            event.stopPropagation();
+            return stopEvent = true;
         };
-        return b.$on("event:stopTapOutside", function() {
-            return g = true;
+        return scope.$on("event:stopTapOutside", function() {
+            return stopEvent = true;
         });
     };
 } ]);
