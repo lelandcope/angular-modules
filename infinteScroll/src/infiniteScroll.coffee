@@ -18,7 +18,7 @@ angularInfiniteScroll.directive 'infiniteScroll', ()->
 				elem.on 'scroll', handleScroll
 
 			handleScroll = (event)->
-				scrolllocation = ((elem[0].scrollHeight - elem.height()) - elem.scrollTop())
+				scrollLocation = ((elem[0].scrollHeight - elem.height()) - elem.scrollTop())
 
 				if scrollLocation <= threshold
 					scope.$eval attrs.infiniteScroll

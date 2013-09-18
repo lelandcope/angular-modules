@@ -1,6 +1,6 @@
 {
   "name": "infinteScroll",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Infinite Scroll Module for Angular JS",
   "main": "infiniteScroll.js",
   "scripts": {

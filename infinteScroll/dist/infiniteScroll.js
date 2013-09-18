@@ -1,7 +1,7 @@
 /*! 
- infinteScroll v0.0.1 
+ infinteScroll v0.0.2 
  Author: Leland Cope @lelandcope 
- 2013-09-13 
+ 2013-09-17 
  */
 
 "use strict";
@@ -28,8 +28,8 @@ angularInfiniteScroll.directive("infiniteScroll", function() {
                 elem.on("scroll", handleScroll);
             }
             return handleScroll = function(event) {
-                var scrolllocation;
-                scrolllocation = elem[0].scrollHeight - elem.height() - elem.scrollTop();
+                var scrollLocation;
+                scrollLocation = elem[0].scrollHeight - elem.height() - elem.scrollTop();
                 if (scrollLocation <= threshold) {
                     scope.$eval(attrs.infiniteScroll);
                     return scope.$apply();
