@@ -1,0 +1,18 @@
+{
+  "name": "qDecorator",
+  "version": "1.0.0",
+  "description": "Adds success and error callbacks to the $q service in Angular JS.",
+  "main": "qdecorator.js",
+  "scripts": {
+    "test": ""
+  },
+  "repository": "",
+  "url": "https://github.com/lelandcope/angular-modules/tree/master/qDecorator",
+  "author": "Leland Cope @lelandcope",
+  "license": "BSD",
+  "dependencies": {
+    "grunt": "~0.4.1",
+    "grunt-contrib-coffee": "~0.7.0",
+    "grunt-contrib-uglify": "~0.2.4"
+  }
+}
