@@ -1,7 +1,7 @@
 /*! 
- lcTouch v0.0.8 
+ lcTouch v0.1.0 
  Author: Leland Cope @lelandcope 
- 2013-09-17 
+ 2013-10-18 
  */
 
 var lcTouch;
@@ -112,5 +112,143 @@ lcTouch.directive("ngTapOutside", [ "$timeout", function($timeout) {
         return scope.$on("event:stopTapOutside", function() {
             return stopEvent = true;
         });
+    };
+} ]);
+
+/*
+	ngSwipeDown, ngSwipeUp, ngSwipeLeft, ngSwipeRight
+
+	Description: Adds swipe directives
+
+	Usage:
+	<div ng-swipe-down="onswipedown()">
+		...... HTML ......
+	</div>
+*/
+lcTouch.factory("$swipe", [ function() {
+    return {
+        bind: function(elem, events) {
+            var endX, endY, ontouchend, ontouchmove, ontouchstart, startX, startY;
+            startX = 0;
+            startY = 0;
+            endX = 0;
+            endY = 0;
+            ontouchstart = function(e) {
+                var touch;
+                touch = e.originalEvent.touches[0];
+                startX = touch.pageX;
+                startY = touch.pageY;
+                elem.on("touchmove", ontouchmove);
+                elem.on("touchend", ontouchend);
+                if (events.start) {
+                    return events.start(elem, [ startX, startY ]);
+                }
+            };
+            ontouchmove = function(e) {
+                var touch;
+                touch = e.originalEvent.touches[0];
+                endX = touch.pageX;
+                endY = touch.pageY;
+                if (events.move) {
+                    return events.move(elem, [ endX, endY ]);
+                }
+            };
+            ontouchend = function(e) {
+                elem.off("touchmove", ontouchmove);
+                elem.off("touchend", ontouchend);
+                if (events.end) {
+                    events.end(elem, [ startX - endX, startY - endY ]);
+                }
+                startX = 0;
+                startY = 0;
+                endX = 0;
+                return endY = 0;
+            };
+            return elem.on("touchstart", ontouchstart);
+        }
+    };
+} ]);
+
+lcTouch.directive("ngSwipeDown", [ "$swipe", function($swipe) {
+    return {
+        restrict: "A",
+        link: function(scope, elem, attrs) {
+            var onend, threshold;
+            threshold = Number(attrs.threshold) || 70;
+            onend = function(elem, amounts) {
+                var amount;
+                amount = amounts[1];
+                console.log("swipe down amount", amount);
+                if (amount < 0 && Math.abs(amount) >= threshold) {
+                    return scope.$apply(attrs["ngSwipeDown"]);
+                }
+            };
+            return $swipe.bind(elem, {
+                end: onend
+            });
+        }
+    };
+} ]);
+
+lcTouch.directive("ngSwipeUp", [ "$swipe", function($swipe) {
+    return {
+        restrict: "A",
+        link: function(scope, elem, attrs) {
+            var onend, threshold;
+            threshold = Number(attrs.threshold) || 70;
+            onend = function(elem, amounts) {
+                var amount;
+                amount = amounts[1];
+                console.log("swipe down amount", amount);
+                if (amount > 0 && Math.abs(amount) >= threshold) {
+                    return scope.$apply(attrs["ngSwipeDown"]);
+                }
+            };
+            return $swipe.bind(elem, {
+                end: onend
+            });
+        }
+    };
+} ]);
+
+lcTouch.directive("ngSwipeRight", [ "$swipe", function($swipe) {
+    return {
+        restrict: "A",
+        link: function(scope, elem, attrs) {
+            var onend, threshold;
+            threshold = Number(attrs.threshold) || 70;
+            onend = function(elem, amounts) {
+                var amount;
+                amount = amounts[0];
+                console.log("swipe down amount", amount);
+                if (amount < 0 && Math.abs(amount) >= threshold) {
+                    return scope.$apply(attrs["ngSwipeDown"]);
+                }
+            };
+            return $swipe.bind(elem, {
+                end: onend
+            });
+        }
+    };
+} ]);
+
+lcTouch.directive("ngSwipeLeft", [ "$swipe", function($swipe) {
+    return {
+        restrict: "A",
+        link: function(scope, elem, attrs) {
+            var onend, threshold;
+            threshold = Number(attrs.threshold) || 70;
+            onend = function(elem, amounts) {
+                var amount;
+                amount = amounts[0];
+                console.log("swipe down amount", amount);
+                if (amount > 0 && Math.abs(amount) >= threshold) {
+                    return scope.$apply(attrs["ngSwipeDown"]);
+                }
+            };
+            return $swipe.bind(elem, {
+                end: onend
+            });
+        }
     };
 } ]);

@@ -104,3 +104,127 @@ lcTouch.directive 'ngTapOutside', ['$timeout', ($timeout)->
 		scope.$on 'event:stopTapOutside', ()->
 			stopEvent = true
 ]
+
+
+###
+	ngSwipeDown, ngSwipeUp, ngSwipeLeft, ngSwipeRight
+
+	Description: Adds swipe directives
+
+	Usage:
+	<div ng-swipe-down="onswipedown()">
+		...... HTML ......
+	</div>
+###
+
+lcTouch.factory '$swipe', [()->
+	return {
+		bind: (elem, events)->
+			startX       = 0
+			startY       = 0
+			endX         = 0
+			endY         = 0
+
+			ontouchstart = (e)->
+				touch   = e.originalEvent.touches[0]
+				startX  = touch.pageX
+				startY  = touch.pageY
+
+				elem.on 'touchmove', ontouchmove
+				elem.on 'touchend', ontouchend
+
+				if events.start then events.start elem, [startX, startY]
+
+			ontouchmove = (e)->
+				touch   = e.originalEvent.touches[0]
+				endX  = touch.pageX
+				endY  = touch.pageY
+
+				if events.move then events.move elem, [endX, endY]
+
+			ontouchend = (e)->
+				elem.off 'touchmove', ontouchmove
+				elem.off 'touchend', ontouchend
+
+				if events.end then events.end elem, [startX - endX, startY - endY]
+
+				startX       = 0
+				startY       = 0
+				endX         = 0
+				endY         = 0
+
+			elem.on 'touchstart', ontouchstart
+	}
+]
+
+lcTouch.directive 'ngSwipeDown', ['$swipe', ($swipe)->
+	return {
+		restrict: 'A'
+		link: (scope, elem, attrs)->
+			threshold = Number(attrs.threshold) or 70
+
+			onend = (elem, amounts)->
+				amount = amounts[1]
+
+				console.log 'swipe down amount', amount
+
+				if amount < 0 and Math.abs(amount) >= threshold
+					scope.$apply attrs["ngSwipeDown"]
+
+			$swipe.bind elem, { end: onend }
+	}
+]
+
+lcTouch.directive 'ngSwipeUp', ['$swipe', ($swipe)->
+	return {
+		restrict: 'A'
+		link: (scope, elem, attrs)->
+			threshold = Number(attrs.threshold) or 70
+
+			onend = (elem, amounts)->
+				amount = amounts[1]
+
+				console.log 'swipe down amount', amount
+
+				if amount > 0 and Math.abs(amount) >= threshold
+					scope.$apply attrs["ngSwipeDown"]
+
+			$swipe.bind elem, { end: onend }
+	}
+]
+
+lcTouch.directive 'ngSwipeRight', ['$swipe', ($swipe)->
+	return {
+		restrict: 'A'
+		link: (scope, elem, attrs)->
+			threshold = Number(attrs.threshold) or 70
+
+			onend = (elem, amounts)->
+				amount = amounts[0]
+
+				console.log 'swipe down amount', amount
+
+				if amount < 0 and Math.abs(amount) >= threshold
+					scope.$apply attrs["ngSwipeDown"]
+
+			$swipe.bind elem, { end: onend }
+	}
+]
+
+lcTouch.directive 'ngSwipeLeft', ['$swipe', ($swipe)->
+	return {
+		restrict: 'A'
+		link: (scope, elem, attrs)->
+			threshold = Number(attrs.threshold) or 70
+
+			onend = (elem, amounts)->
+				amount = amounts[0]
+
+				console.log 'swipe down amount', amount
+
+				if amount > 0 and Math.abs(amount) >= threshold
+					scope.$apply attrs["ngSwipeDown"]
+
+			$swipe.bind elem, { end: onend }
+	}
+]
