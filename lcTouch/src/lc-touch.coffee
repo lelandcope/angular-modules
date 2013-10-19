@@ -166,8 +166,6 @@ lcTouch.directive 'ngSwipeDown', ['$swipe', ($swipe)->
 			onend = (elem, amounts)->
 				amount = amounts[1]
 
-				console.log 'swipe down amount', amount
-
 				if amount < 0 and Math.abs(amount) >= threshold
 					scope.$apply attrs["ngSwipeDown"]
 
@@ -184,10 +182,8 @@ lcTouch.directive 'ngSwipeUp', ['$swipe', ($swipe)->
 			onend = (elem, amounts)->
 				amount = amounts[1]
 
-				console.log 'swipe down amount', amount
-
 				if amount > 0 and Math.abs(amount) >= threshold
-					scope.$apply attrs["ngSwipeDown"]
+					scope.$apply attrs["ngSwipeUp"]
 
 			$swipe.bind elem, { end: onend }
 	}
@@ -202,10 +198,8 @@ lcTouch.directive 'ngSwipeRight', ['$swipe', ($swipe)->
 			onend = (elem, amounts)->
 				amount = amounts[0]
 
-				console.log 'swipe down amount', amount
-
 				if amount < 0 and Math.abs(amount) >= threshold
-					scope.$apply attrs["ngSwipeDown"]
+					scope.$apply attrs["ngSwipeRight"]
 
 			$swipe.bind elem, { end: onend }
 	}
@@ -220,10 +214,8 @@ lcTouch.directive 'ngSwipeLeft', ['$swipe', ($swipe)->
 			onend = (elem, amounts)->
 				amount = amounts[0]
 
-				console.log 'swipe down amount', amount
-
 				if amount > 0 and Math.abs(amount) >= threshold
-					scope.$apply attrs["ngSwipeDown"]
+					scope.$apply attrs["ngSwipeLeft"]
 
 			$swipe.bind elem, { end: onend }
 	}

@@ -178,7 +178,6 @@ lcTouch.directive("ngSwipeDown", [ "$swipe", function($swipe) {
             onend = function(elem, amounts) {
                 var amount;
                 amount = amounts[1];
-                console.log("swipe down amount", amount);
                 if (amount < 0 && Math.abs(amount) >= threshold) {
                     return scope.$apply(attrs["ngSwipeDown"]);
                 }
@@ -199,9 +198,8 @@ lcTouch.directive("ngSwipeUp", [ "$swipe", function($swipe) {
             onend = function(elem, amounts) {
                 var amount;
                 amount = amounts[1];
-                console.log("swipe down amount", amount);
                 if (amount > 0 && Math.abs(amount) >= threshold) {
-                    return scope.$apply(attrs["ngSwipeDown"]);
+                    return scope.$apply(attrs["ngSwipeUp"]);
                 }
             };
             return $swipe.bind(elem, {
@@ -220,9 +218,8 @@ lcTouch.directive("ngSwipeRight", [ "$swipe", function($swipe) {
             onend = function(elem, amounts) {
                 var amount;
                 amount = amounts[0];
-                console.log("swipe down amount", amount);
                 if (amount < 0 && Math.abs(amount) >= threshold) {
-                    return scope.$apply(attrs["ngSwipeDown"]);
+                    return scope.$apply(attrs["ngSwipeRight"]);
                 }
             };
             return $swipe.bind(elem, {
@@ -241,9 +238,8 @@ lcTouch.directive("ngSwipeLeft", [ "$swipe", function($swipe) {
             onend = function(elem, amounts) {
                 var amount;
                 amount = amounts[0];
-                console.log("swipe down amount", amount);
                 if (amount > 0 && Math.abs(amount) >= threshold) {
-                    return scope.$apply(attrs["ngSwipeDown"]);
+                    return scope.$apply(attrs["ngSwipeLeft"]);
                 }
             };
             return $swipe.bind(elem, {
