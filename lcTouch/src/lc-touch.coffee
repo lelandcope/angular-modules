@@ -161,7 +161,7 @@ lcTouch.directive 'ngSwipeDown', ['$swipe', ($swipe)->
 	return {
 		restrict: 'A'
 		link: (scope, elem, attrs)->
-			threshold = Number(attrs.threshold) or 70
+			threshold = Number(attrs.ngSwipeDownThreshold) or 70
 
 			onend = (elem, amounts)->
 				amount = amounts[1]
@@ -177,7 +177,7 @@ lcTouch.directive 'ngSwipeUp', ['$swipe', ($swipe)->
 	return {
 		restrict: 'A'
 		link: (scope, elem, attrs)->
-			threshold = Number(attrs.threshold) or 70
+			threshold = Number(attrs.ngSwipeUpThreshold) or 70
 
 			onend = (elem, amounts)->
 				amount = amounts[1]
@@ -193,7 +193,7 @@ lcTouch.directive 'ngSwipeRight', ['$swipe', ($swipe)->
 	return {
 		restrict: 'A'
 		link: (scope, elem, attrs)->
-			threshold = Number(attrs.threshold) or 70
+			threshold = Number(attrs.ngSwipeRightThreshold) or 70
 
 			onend = (elem, amounts)->
 				amount = amounts[0]
@@ -209,7 +209,7 @@ lcTouch.directive 'ngSwipeLeft', ['$swipe', ($swipe)->
 	return {
 		restrict: 'A'
 		link: (scope, elem, attrs)->
-			threshold = Number(attrs.threshold) or 70
+			threshold = Number(attrs.ngSwipeLeftThreshold) or 70
 
 			onend = (elem, amounts)->
 				amount = amounts[0]

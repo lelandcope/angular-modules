@@ -1,7 +1,7 @@
 /*! 
  lcTouch v0.1.0 
  Author: Leland Cope @lelandcope 
- 2013-10-18 
+ 2013-10-23 
  */
 
 var lcTouch;
@@ -174,7 +174,7 @@ lcTouch.directive("ngSwipeDown", [ "$swipe", function($swipe) {
         restrict: "A",
         link: function(scope, elem, attrs) {
             var onend, threshold;
-            threshold = Number(attrs.threshold) || 70;
+            threshold = Number(attrs.ngSwipeDownThreshold) || 70;
             onend = function(elem, amounts) {
                 var amount;
                 amount = amounts[1];
@@ -194,7 +194,7 @@ lcTouch.directive("ngSwipeUp", [ "$swipe", function($swipe) {
         restrict: "A",
         link: function(scope, elem, attrs) {
             var onend, threshold;
-            threshold = Number(attrs.threshold) || 70;
+            threshold = Number(attrs.ngSwipeUpThreshold) || 70;
             onend = function(elem, amounts) {
                 var amount;
                 amount = amounts[1];
@@ -214,7 +214,7 @@ lcTouch.directive("ngSwipeRight", [ "$swipe", function($swipe) {
         restrict: "A",
         link: function(scope, elem, attrs) {
             var onend, threshold;
-            threshold = Number(attrs.threshold) || 70;
+            threshold = Number(attrs.ngSwipeRightThreshold) || 70;
             onend = function(elem, amounts) {
                 var amount;
                 amount = amounts[0];
@@ -234,7 +234,7 @@ lcTouch.directive("ngSwipeLeft", [ "$swipe", function($swipe) {
         restrict: "A",
         link: function(scope, elem, attrs) {
             var onend, threshold;
-            threshold = Number(attrs.threshold) || 70;
+            threshold = Number(attrs.ngSwipeLeftThreshold) || 70;
             onend = function(elem, amounts) {
                 var amount;
                 amount = amounts[0];
