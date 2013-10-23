@@ -18,6 +18,14 @@ This will build a normal version and a minified version of the module and place 
 
 [ngTapOutside](#ngtapoutside) - Adds tap support for when a user taps or clicks outside a designated area
 
+[ngSwipeDown](#ngswipedown) - Adds Swipe Down support to an element
+
+[ngSwipeUp](#ngswipeup) - Adds Swipe Up support to an element
+
+[ngSwipeLeft](#ngswipeleft) - Adds Swipe Left support to an element
+
+[ngSwipeRight](#ngswiperight) - Adds Swipe Right support to an element
+
 ---------------
 
 ## ngTap
