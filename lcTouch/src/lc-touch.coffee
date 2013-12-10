@@ -59,6 +59,66 @@ lcTouch.directive 'ngTap', ['$timeout', ($timeout)->
 
 
 ###
+	ngDbltap
+
+	Description: A replacement for ngDblclick. This directive will take into account taps and clicks so it
+	will work for both mobile and desktop browsers.
+
+	Usage:
+	<button type="button" ng-dbltap="doSomething()">Click Me</button>
+###
+
+lcTouch.directive 'ngDbltap', ['$timeout', ($timeout)->
+	(scope, elem, attrs)->
+		distanceThreshold    = 25
+		timeThreshold        = 500
+		tapped               = false
+		tapcount			 = 0
+
+		elem.on 'touchstart', (startEvent)->
+			target      = startEvent.target
+			touchStart  = startEvent.originalEvent.touches[0]
+			startX      = touchStart.pageX
+			startY      = touchStart.pageY
+
+			removeTapHandler = ()->
+				$timeout.cancel()
+				elem.off 'touchmove', moveHandler
+				elem.off 'touchend', tapHandler
+				tapcount = 0
+
+			tapHandler = (endEvent)->
+				endEvent.preventDefault()
+				tapcount++
+
+				if tapcount >= 2
+					removeTapHandler()
+					if target is endEvent.target
+						tapped = true
+						scope.$apply attrs["ngDbltap"]
+
+			moveHandler = (moveEvent)->
+				touchMove  = moveEvent.originalEvent.touches[0]
+				moveX      = touchMove.pageX
+				moveY      = touchMove.pageY
+
+				if Math.abs(moveX - startX) > distanceThreshold or Math.abs(moveY - startY) > distanceThreshold
+					tapped = true
+					removeTapHandler()
+
+			$timeout removeTapHandler, timeThreshold
+
+			elem.on 'touchmove', moveHandler
+			elem.on 'touchend', tapHandler
+
+
+		elem.bind 'dblclick', ()->
+			unless tapped
+				scope.$apply attrs["ngDbltap"]
+]
+
+
+###
 	ngTapOutside
 
 	Description: A directive that listens when a user clicks or taps

@@ -1,7 +1,7 @@
 /*! 
- lcTouch v0.1.0 
+ lcTouch v0.2.0 
  Author: Leland Cope @lelandcope 
- 2013-10-23 
+ 2013-12-09 
  */
 
 var lcTouch;
@@ -62,6 +62,67 @@ lcTouch.directive("ngTap", [ "$timeout", function($timeout) {
         return elem.bind("click", function() {
             if (!tapped) {
                 return scope.$apply(attrs["ngTap"]);
+            }
+        });
+    };
+} ]);
+
+/*
+	ngDbltap
+
+	Description: A replacement for ngDblclick. This directive will take into account taps and clicks so it
+	will work for both mobile and desktop browsers.
+
+	Usage:
+	<button type="button" ng-dbltap="doSomething()">Click Me</button>
+*/
+lcTouch.directive("ngDbltap", [ "$timeout", function($timeout) {
+    return function(scope, elem, attrs) {
+        var distanceThreshold, tapcount, tapped, timeThreshold;
+        distanceThreshold = 25;
+        timeThreshold = 500;
+        tapped = false;
+        tapcount = 0;
+        elem.on("touchstart", function(startEvent) {
+            var moveHandler, removeTapHandler, startX, startY, tapHandler, target, touchStart;
+            target = startEvent.target;
+            touchStart = startEvent.originalEvent.touches[0];
+            startX = touchStart.pageX;
+            startY = touchStart.pageY;
+            removeTapHandler = function() {
+                $timeout.cancel();
+                elem.off("touchmove", moveHandler);
+                elem.off("touchend", tapHandler);
+                return tapcount = 0;
+            };
+            tapHandler = function(endEvent) {
+                endEvent.preventDefault();
+                tapcount++;
+                if (tapcount >= 2) {
+                    removeTapHandler();
+                    if (target === endEvent.target) {
+                        tapped = true;
+                        return scope.$apply(attrs["ngDbltap"]);
+                    }
+                }
+            };
+            moveHandler = function(moveEvent) {
+                var moveX, moveY, touchMove;
+                touchMove = moveEvent.originalEvent.touches[0];
+                moveX = touchMove.pageX;
+                moveY = touchMove.pageY;
+                if (Math.abs(moveX - startX) > distanceThreshold || Math.abs(moveY - startY) > distanceThreshold) {
+                    tapped = true;
+                    return removeTapHandler();
+                }
+            };
+            $timeout(removeTapHandler, timeThreshold);
+            elem.on("touchmove", moveHandler);
+            return elem.on("touchend", tapHandler);
+        });
+        return elem.bind("dblclick", function() {
+            if (!tapped) {
+                return scope.$apply(attrs["ngDbltap"]);
             }
         });
     };
