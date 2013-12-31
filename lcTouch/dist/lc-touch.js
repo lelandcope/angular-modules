@@ -1,7 +1,7 @@
 /*! 
- lcTouch v0.2.0 
+ lcTouch v0.3.0 
  Author: Leland Cope @lelandcope 
- 2013-12-09 
+ 2013-12-30 
  */
 
 var lcTouch;
@@ -304,6 +304,95 @@ lcTouch.directive("ngSwipeLeft", [ "$swipe", function($swipe) {
                 }
             };
             return $swipe.bind(elem, {
+                end: onend
+            });
+        }
+    };
+} ]);
+
+/*
+	ngDragSwipeHorizontal
+
+	Description: Adds a drag swipe to a carousal
+*/
+lcTouch.directive("ngDragSwipeHorizontal", [ "$swipe", "$timeout", function($swipe, $timeout) {
+    return {
+        restrict: "A",
+        link: function(scope, elem, attrs) {
+            var cleanArray, minDistance, minInertia, movable, notInArray, offset, onend, onmove, onstart, totalChildren, wrapperWidth;
+            offset = 0;
+            totalChildren = elem.children().length;
+            wrapperWidth = elem.parent().width();
+            minDistance = attrs.ngDragSwipeHorizontalMinDistance || wrapperWidth * .5;
+            minInertia = attrs.ngDragSwipeHorizontalMinInertia || .65;
+            movable = [];
+            onstart = function(el, amounts, e) {
+                return $(e.currentTarget).data("touchStart", {
+                    x: amounts[0],
+                    y: amounts[1],
+                    timeStamp: e.timeStamp
+                });
+            };
+            onend = function(el, amounts, e) {
+                var distanceMoved, speed, startEvent, time, x1, x2;
+                startEvent = $(e.currentTarget).data("touchStart");
+                x1 = offset * wrapperWidth;
+                x2 = Math.abs(parseInt($(elem.children()[offset]).css("x")));
+                distanceMoved = x1 - x2;
+                speed = Math.abs(Math.max(Math.min((x2 - x1) / Math.max(e.timeStamp - startEvent.timeStamp, 1), 1), -1));
+                if (distanceMoved < 0 && (Math.abs(distanceMoved) >= minDistance || speed >= minInertia) && totalChildren !== offset + 1) {
+                    offset++;
+                } else if (distanceMoved > 0 && (Math.abs(distanceMoved) >= minDistance || speed >= minInertia) && offset !== 0) {
+                    offset--;
+                }
+                if (distanceMoved !== 0) {
+                    time = 500 - 500 * (75 * speed / 100);
+                    $(movable).transition({
+                        x: offset * -wrapperWidth + "px"
+                    }, time, "out");
+                    return $timeout(function() {
+                        return $(notInArray(elem.children(), movable)).css({
+                            x: offset * -wrapperWidth + "px"
+                        });
+                    }, time);
+                }
+            };
+            onmove = function(el, amounts, e) {
+                var placement, startEvent;
+                startEvent = $(e.currentTarget).data("touchStart");
+                placement = amounts[0] - startEvent.x + offset * -wrapperWidth;
+                if (placement <= 0 && placement >= (totalChildren - 1) * -wrapperWidth) {
+                    movable = cleanArray([ elem.children()[offset], elem.children()[offset - 1], elem.children()[offset + 1] ]);
+                    return $(movable).css({
+                        x: placement + "px"
+                    });
+                }
+            };
+            cleanArray = function(arr) {
+                var el, i, tmp, _i, _len;
+                tmp = [];
+                for (i = _i = 0, _len = arr.length; _i < _len; i = ++_i) {
+                    el = arr[i];
+                    if (el) {
+                        tmp.push(el);
+                    }
+                }
+                return tmp;
+            };
+            notInArray = function(arr1, arr2) {
+                var el, i, tmp, _i, _len;
+                tmp = [];
+                for (i = _i = 0, _len = arr1.length; _i < _len; i = ++_i) {
+                    el = arr1[i];
+                    if (arr2.indexOf(el) === -1) {
+                        tmp.push(el);
+                    }
+                }
+                return tmp;
+            };
+            return $swipe.bind(elem.children(), {
+                move: onmove,
+                start: onstart,
                 end: onend
             });
         }

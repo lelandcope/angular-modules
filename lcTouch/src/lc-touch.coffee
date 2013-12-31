@@ -280,3 +280,77 @@ lcTouch.directive 'ngSwipeLeft', ['$swipe', ($swipe)->
 			$swipe.bind elem, { end: onend }
 	}
 ]
+
+
+
+###
+	ngDragSwipeHorizontal
+
+	Description: Adds a drag swipe to a carousal
+###
+
+lcTouch.directive 'ngDragSwipeHorizontal', ['$swipe', '$timeout', ($swipe, $timeout)->
+	return {
+		restrict: 'A'
+		link: (scope, elem, attrs)->
+			offset           = 0
+			totalChildren    = elem.children().length
+			wrapperWidth     = elem.parent().width()
+			minDistance      = attrs.ngDragSwipeHorizontalMinDistance or wrapperWidth*0.5
+			minInertia		 = attrs.ngDragSwipeHorizontalMinInertia or 0.65
+			movable			 = []
+
+			onstart = (el, amounts, e)->
+				$(e.currentTarget).data('touchStart', { x: amounts[0], y: amounts[1], timeStamp: e.timeStamp })
+
+			onend = (el, amounts, e)->
+				startEvent      = $(e.currentTarget).data('touchStart')
+				x1              = offset*wrapperWidth
+				x2              = Math.abs(parseInt($(elem.children()[offset]).css('x')))
+				distanceMoved   = x1 - x2
+				speed           = Math.abs(Math.max(Math.min((x2 - x1) / Math.max(e.timeStamp - startEvent.timeStamp, 1), 1), -1))
+
+				if distanceMoved < 0 and (Math.abs(distanceMoved) >= minDistance or speed >= minInertia) and totalChildren isnt offset+1
+					offset++
+				else if distanceMoved > 0 and (Math.abs(distanceMoved) >= minDistance or speed >= minInertia) and offset isnt 0
+					offset--
+
+				if distanceMoved != 0
+					time = 500 - 500*((75*speed)/100)
+
+					$(movable).transition({ x: offset*(-wrapperWidth)+'px' }, time, 'out')
+					$timeout ()->
+						$(notInArray(elem.children(), movable)).css { x: offset*(-wrapperWidth)+'px' }
+					, time
+
+			onmove = (el, amounts, e)->
+				startEvent = $(e.currentTarget).data('touchStart')
+				placement  = amounts[0]-startEvent.x+offset*(-wrapperWidth)
+
+				if placement <= 0 and placement >= (totalChildren-1)*(-wrapperWidth)
+					movable = cleanArray([elem.children()[offset], elem.children()[offset-1], elem.children()[offset+1]])
+
+					$(movable).css { x: placement+'px' }
+
+			cleanArray = (arr)->
+				tmp = []
+
+				for el, i in arr
+					if el
+						tmp.push el
+
+				return tmp
+
+			notInArray = (arr1, arr2)->
+				tmp = []
+
+				for el, i in arr1
+					if arr2.indexOf(el) is -1
+						tmp.push el
+
+				return tmp
+
+
+			$swipe.bind elem.children(), { move: onmove, start: onstart, end: onend }
+	}
+]
