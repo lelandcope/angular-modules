@@ -193,20 +193,20 @@ lcTouch.factory '$swipe', [()->
 				elem.on 'touchmove', ontouchmove
 				elem.on 'touchend', ontouchend
 
-				if events.start then events.start elem, [startX, startY]
+				if events.start then events.start elem, [startX, startY], e
 
 			ontouchmove = (e)->
 				touch   = e.originalEvent.touches[0]
 				endX  = touch.pageX
 				endY  = touch.pageY
 
-				if events.move then events.move elem, [endX, endY]
+				if events.move then events.move elem, [endX, endY], e
 
 			ontouchend = (e)->
 				elem.off 'touchmove', ontouchmove
 				elem.off 'touchend', ontouchend
 
-				if events.end then events.end elem, [startX - endX, startY - endY]
+				if events.end then events.end elem, [startX - endX, startY - endY], e
 
 				startX       = 0
 				startY       = 0
@@ -286,71 +286,232 @@ lcTouch.directive 'ngSwipeLeft', ['$swipe', ($swipe)->
 ###
 	ngDragSwipeHorizontal
 
-	Description: Adds a drag swipe to a carousal
+	Description: Drag Swipe Horizontally
 ###
 
-lcTouch.directive 'ngDragSwipeHorizontal', ['$swipe', '$timeout', ($swipe, $timeout)->
-	return {
-		restrict: 'A'
-		link: (scope, elem, attrs)->
-			offset           = 0
-			totalChildren    = elem.children().length
-			wrapperWidth     = elem.parent().width()
-			minDistance      = attrs.ngDragSwipeHorizontalMinDistance or wrapperWidth*0.5
-			minInertia		 = attrs.ngDragSwipeHorizontalMinInertia or 0.65
-			movable			 = []
+lcTouch.factory '$ngDragSwipeHorizontal', ['$swipe', '$timeout', ($swipe, $timeout)->
+	cleanArray = (arr)->
+		tmp = []
+
+		for el, i in arr
+			if el
+				tmp.push el
+
+		return tmp
+
+	notInArray = (arr1, arr2)->
+		tmp = []
+
+		for el, i in arr1
+			if arr2.indexOf(el) is -1
+				tmp.push el
+
+		return tmp
+
+	class DSH
+		offset: 0
+		totalChildren: 0
+		wrapperWidth: 0
+		minDistance: 0
+		minInertia: 0
+		movable: []
+		infiniteScroll: false
+		animating: false
+
+		bind: (elem, attrs, infScroll)->
+			self			 	  = @
+			self.totalChildren    = elem.children().length
+			self.wrapperWidth     = elem.parent().width()
+			self.minDistance      = attrs.ngDragSwipeHorizontalMinDistance or self.wrapperWidth*0.5
+			self.minInertia       = attrs.ngDragSwipeHorizontalMinInertia or 0.65
+			self.infiniteScroll   = infScroll or false
 
 			onstart = (el, amounts, e)->
 				$(e.currentTarget).data('touchStart', { x: amounts[0], y: amounts[1], timeStamp: e.timeStamp })
 
 			onend = (el, amounts, e)->
 				startEvent      = $(e.currentTarget).data('touchStart')
-				x1              = offset*wrapperWidth
-				x2              = Math.abs(parseInt($(elem.children()[offset]).css('x')))
+				x1              = self.offset*self.wrapperWidth
+				x2              = Math.abs(parseInt($(elem.children()[self.offset]).css('x')))
 				distanceMoved   = x1 - x2
 				speed           = Math.abs(Math.max(Math.min((x2 - x1) / Math.max(e.timeStamp - startEvent.timeStamp, 1), 1), -1))
 
-				if distanceMoved < 0 and (Math.abs(distanceMoved) >= minDistance or speed >= minInertia) and totalChildren isnt offset+1
-					offset++
-				else if distanceMoved > 0 and (Math.abs(distanceMoved) >= minDistance or speed >= minInertia) and offset isnt 0
-					offset--
+				if distanceMoved < 0 and (Math.abs(distanceMoved) >= self.minDistance or speed >= self.minInertia) and self.totalChildren isnt self.offset+1
+					self.offset++
+				else if distanceMoved > 0 and (Math.abs(distanceMoved) >= self.minDistance or speed >= self.minInertia) and self.offset isnt 0
+					self.offset--
 
 				if distanceMoved != 0
 					time = 500 - 500*((75*speed)/100)
 
-					$(movable).transition({ x: offset*(-wrapperWidth)+'px' }, time, 'out')
+					$(self.movable).transition({ x: self.offset*(-self.wrapperWidth)+'px' }, time, 'out')
 					$timeout ()->
-						$(notInArray(elem.children(), movable)).css { x: offset*(-wrapperWidth)+'px' }
+						$(notInArray(elem.children(), self.movable)).css { x: self.offset*(-self.wrapperWidth)+'px' }
+						if self.infiniteScroll then self.resetOrder(elem, attrs)
 					, time
 
 			onmove = (el, amounts, e)->
 				startEvent = $(e.currentTarget).data('touchStart')
-				placement  = amounts[0]-startEvent.x+offset*(-wrapperWidth)
+				placement  = amounts[0]-startEvent.x+self.offset*(-self.wrapperWidth)
 
-				if placement <= 0 and placement >= (totalChildren-1)*(-wrapperWidth)
-					movable = cleanArray([elem.children()[offset], elem.children()[offset-1], elem.children()[offset+1]])
+				if placement <= 0 and placement >= (self.totalChildren-1)*(-self.wrapperWidth)
+					self.movable = cleanArray([elem.children()[self.offset], elem.children()[self.offset-1], elem.children()[self.offset+1]])
 
-					$(movable).css { x: placement+'px' }
-
-			cleanArray = (arr)->
-				tmp = []
-
-				for el, i in arr
-					if el
-						tmp.push el
-
-				return tmp
-
-			notInArray = (arr1, arr2)->
-				tmp = []
-
-				for el, i in arr1
-					if arr2.indexOf(el) is -1
-						tmp.push el
-
-				return tmp
+					$(self.movable).css { x: placement+'px' }
 
 
+			if self.infiniteScroll then self.resetOrder(elem, attrs)
 			$swipe.bind elem.children(), { move: onmove, start: onstart, end: onend }
+
+
+		resetOrder: (elem, attrs)->
+			self = @
+
+			if self.offset is 0 and self.infiniteScroll
+				elem.prepend elem.children().last()
+				self.offset = 1
+			else if self.offset > 1 and self.infiniteScroll
+				elem.append elem.children().first()
+				self.offset = 1
+
+			$(elem.children()).css { x: self.offset*(-self.wrapperWidth)+'px' }
+
+
+		next: (elem, attrs)->
+			self = @
+
+			if self.animating then return
+
+			self.offset++
+			time = 500
+			self.animating = true
+
+			movable = cleanArray([elem.children()[self.offset], elem.children()[self.offset-1], elem.children()[self.offset+1]])
+			$(movable).transition({ x: self.offset*(-self.wrapperWidth)+'px' }, time, 'out')
+
+			$timeout ()->
+				if self.infiniteScroll then self.resetOrder(elem, attrs)
+				self.animating = false
+			, time
+
+
+		previous: (elem, attrs)->
+			self = @
+
+			if self.animating then return
+
+			self.offset--
+			time = 500
+			self.animating = true
+
+			movable = cleanArray([elem.children()[self.offset], elem.children()[self.offset-1], elem.children()[self.offset+1]])
+			$(movable).transition({ x: self.offset*(-self.wrapperWidth)+'px' }, time, 'out')
+
+			$timeout ()->
+				if self.infiniteScroll then self.resetOrder(elem, attrs)
+				self.animating = false
+			, time
+
+
+	# Done this way so it gets a unique class
+	return ()->
+		return new DSH()
+
+]
+
+lcTouch.directive 'ngDragSwipeHorizontal', ['$ngDragSwipeHorizontal', ($ngDragSwipeHorizontal)->
+	return {
+		restrict: 'A'
+		link: (scope, elem, attrs)->
+			$ngDragSwipeHorizontal().bind elem, attrs
 	}
 ]
+
+
+
+###
+	lcCarouselHorizontal
+
+	Description: Horizontal Carousel
+###
+
+lcTouch.directive 'lcCarouselHorizontal', ['$ngDragSwipeHorizontal', '$compile', '$timeout', ($ngDragSwipeHorizontal, $compile, $timeout)->
+	return {
+		restrict: 'A'
+		scope:
+			ngDragSwipeHorizontalMinDistance: '='
+			ngDragSwipeHorizontalMinInertia: '='
+			forceArrows: '@'
+		link: (scope, elem, attrs)->
+			$dsh = $ngDragSwipeHorizontal()
+			$dsh.bind elem, attrs, true
+
+			$parent = elem.parent()
+			forceArrows = attrs.forceArrows
+
+			arrowInner = $('<div/>').css
+				display: 'table-cell'
+				verticalAlign: 'middle'
+				height: $parent.height()
+
+
+			lArrow = $('<div class="arrow" ng-click="prevCarouselSlide()" />').css
+				position: 'absolute'
+				top: 0
+				left: 0
+				height: $parent.height()
+				padding: '0 10px'
+				cursor: 'pointer'
+			.append arrowInner.clone()
+			.append '<i class="icon-chevron-sign-left"></i>'
+
+
+			rArrow = $('<div class="arrow" ng-click="nextCarouselSlide()" />').css
+				position: 'absolute'
+				top: 0
+				right: 0
+				height: $parent.height()
+				display: 'table-cell'
+				verticalAlign: 'middle'
+				padding: '0 10px'
+				cursor: 'pointer'
+			.append arrowInner.clone()
+			.append '<i class="icon-chevron-sign-right"></i>'
+
+			$parent.css
+				position: 'relative'
+
+			if typeof(window.ontouchstart) is 'undefined'
+				$parent.append $compile(lArrow)(scope)
+				$parent.append $compile(rArrow)(scope)
+
+			elem.css
+				width: $parent.width()*elem.children().length
+				height: $parent.height()
+				display: 'block'
+			.children().css
+				width: $parent.width()
+				height: $parent.height()
+				display: 'block'
+				float: 'left'
+
+
+			# Scope Functions
+			scope.nextCarouselSlide = ()->
+				$timeout ()->
+					$dsh.next(elem, attrs)
+				, 1
+
+			scope.prevCarouselSlide = ()->
+				$timeout ()->
+					$dsh.previous(elem, attrs)
+				, 1
+	}
+]
+
+
+
+
+
+
+
