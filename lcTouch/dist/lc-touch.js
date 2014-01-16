@@ -1,7 +1,7 @@
 /*! 
- lcTouch v0.4.1 
+ lcTouch v0.4.12 
  Author: Leland Cope @lelandcope 
- 2014-01-06 
+ 2014-01-15 
  */
 
 var lcTouch;
@@ -349,15 +349,20 @@ lcTouch.factory("$ngDragSwipeHorizontal", [ "$swipe", "$timeout", function($swip
         DSH.prototype.movable = [];
         DSH.prototype.infiniteScroll = false;
         DSH.prototype.animating = false;
+        DSH.prototype.elem = null;
+        DSH.prototype.attrs = null;
         DSH.prototype.bind = function(elem, attrs, infScroll) {
             var onend, onmove, onstart, self;
             self = this;
-            self.totalChildren = elem.children().length;
-            self.wrapperWidth = elem.parent().width();
+            self.elem = elem;
+            self.attrs = attrs;
+            self.totalChildren = self.elem.children().length;
+            self.wrapperWidth = self.elem.parent().width();
             self.minDistance = attrs.ngDragSwipeHorizontalMinDistance || self.wrapperWidth * .5;
             self.minInertia = attrs.ngDragSwipeHorizontalMinInertia || .65;
             self.infiniteScroll = infScroll || false;
             onstart = function(el, amounts, e) {
+                e.stopPropagation();
                 return $(e.currentTarget).data("touchStart", {
                     x: amounts[0],
                     y: amounts[1],
@@ -366,9 +371,10 @@ lcTouch.factory("$ngDragSwipeHorizontal", [ "$swipe", "$timeout", function($swip
             };
             onend = function(el, amounts, e) {
                 var distanceMoved, speed, startEvent, time, x1, x2;
+                e.stopPropagation();
                 startEvent = $(e.currentTarget).data("touchStart");
                 x1 = self.offset * self.wrapperWidth;
-                x2 = Math.abs(parseInt($(elem.children()[self.offset]).css("x")));
+                x2 = Math.abs(parseInt($(self.elem.children()[self.offset]).css("x")));
                 distanceMoved = x1 - x2;
                 speed = Math.abs(Math.max(Math.min((x2 - x1) / Math.max(e.timeStamp - startEvent.timeStamp, 1), 1), -1));
                 if (distanceMoved < 0 && (Math.abs(distanceMoved) >= self.minDistance || speed >= self.minInertia) && self.totalChildren !== self.offset + 1) {
@@ -382,51 +388,54 @@ lcTouch.factory("$ngDragSwipeHorizontal", [ "$swipe", "$timeout", function($swip
                         x: self.offset * -self.wrapperWidth + "px"
                     }, time, "out");
                     return $timeout(function() {
-                        $(notInArray(elem.children(), self.movable)).css({
+                        $(notInArray(self.elem.children(), self.movable)).css({
                             x: self.offset * -self.wrapperWidth + "px"
                         });
                         if (self.infiniteScroll) {
-                            return self.resetOrder(elem, attrs);
+                            return self.resetOrder(self.elem, attrs);
                         }
                     }, time);
                 }
             };
             onmove = function(el, amounts, e) {
                 var placement, startEvent;
+                e.stopPropagation();
                 startEvent = $(e.currentTarget).data("touchStart");
                 placement = amounts[0] - startEvent.x + self.offset * -self.wrapperWidth;
                 if (placement <= 0 && placement >= (self.totalChildren - 1) * -self.wrapperWidth) {
-                    self.movable = cleanArray([ elem.children()[self.offset], elem.children()[self.offset - 1], elem.children()[self.offset + 1] ]);
+                    self.movable = cleanArray([ self.elem.children()[self.offset], self.elem.children()[self.offset - 1], self.elem.children()[self.offset + 1] ]);
                     return $(self.movable).css({
                         x: placement + "px"
                     });
                 }
             };
             if (self.infiniteScroll) {
-                self.resetOrder(elem, attrs);
+                self.resetOrder();
             }
-            return $swipe.bind(elem.children(), {
+            return $swipe.bind(self.elem.children(), {
                 move: onmove,
                 start: onstart,
                 end: onend
             });
         };
-        DSH.prototype.resetOrder = function(elem, attrs) {
+        DSH.prototype.resetOrder = function() {
             var self;
             self = this;
-            if (self.offset === 0 && self.infiniteScroll) {
-                elem.prepend(elem.children().last());
-                self.offset = 1;
-            } else if (self.offset > 1 && self.infiniteScroll) {
-                elem.append(elem.children().first());
-                self.offset = 1;
+            if (self.elem.children().length > 2) {
+                if (self.offset === 0 && self.infiniteScroll) {
+                    self.elem.prepend(self.elem.children().last());
+                    self.offset = 1;
+                } else if (self.offset > 1 && self.infiniteScroll) {
+                    self.elem.append(self.elem.children().first());
+                    self.offset = 1;
+                }
+                return $(self.elem.children()).css({
+                    x: self.offset * -self.wrapperWidth + "px"
+                });
             }
-            return $(elem.children()).css({
-                x: self.offset * -self.wrapperWidth + "px"
-            });
         };
-        DSH.prototype.next = function(elem, attrs) {
-            var movable, self, time;
+        DSH.prototype.next = function() {
+            var self, time;
             self = this;
             if (self.animating) {
                 return;
@@ -434,19 +443,19 @@ lcTouch.factory("$ngDragSwipeHorizontal", [ "$swipe", "$timeout", function($swip
             self.offset++;
             time = 500;
             self.animating = true;
-            movable = cleanArray([ elem.children()[self.offset], elem.children()[self.offset - 1], elem.children()[self.offset + 1] ]);
-            $(movable).transition({
+            self.movable = cleanArray([ self.elem.children()[self.offset], self.elem.children()[self.offset - 1], self.elem.children()[self.offset + 1] ]);
+            $(self.movable).transition({
                 x: self.offset * -self.wrapperWidth + "px"
             }, time, "out");
             return $timeout(function() {
                 if (self.infiniteScroll) {
-                    self.resetOrder(elem, attrs);
+                    self.resetOrder();
                 }
                 return self.animating = false;
             }, time);
         };
-        DSH.prototype.previous = function(elem, attrs) {
-            var movable, self, time;
+        DSH.prototype.previous = function() {
+            var self, time;
             self = this;
             if (self.animating) {
                 return;
@@ -454,13 +463,13 @@ lcTouch.factory("$ngDragSwipeHorizontal", [ "$swipe", "$timeout", function($swip
             self.offset--;
             time = 500;
             self.animating = true;
-            movable = cleanArray([ elem.children()[self.offset], elem.children()[self.offset - 1], elem.children()[self.offset + 1] ]);
-            $(movable).transition({
+            self.movable = cleanArray([ self.elem.children()[self.offset], self.elem.children()[self.offset - 1], self.elem.children()[self.offset + 1] ]);
+            $(self.movable).transition({
                 x: self.offset * -self.wrapperWidth + "px"
             }, time, "out");
             return $timeout(function() {
                 if (self.infiniteScroll) {
-                    self.resetOrder(elem, attrs);
+                    self.resetOrder();
                 }
                 return self.animating = false;
             }, time);
@@ -489,67 +498,77 @@ lcTouch.directive("ngDragSwipeHorizontal", [ "$ngDragSwipeHorizontal", function(
 lcTouch.directive("lcCarouselHorizontal", [ "$ngDragSwipeHorizontal", "$compile", "$timeout", function($ngDragSwipeHorizontal, $compile, $timeout) {
     return {
         restrict: "A",
-        scope: {
-            ngDragSwipeHorizontalMinDistance: "=",
-            ngDragSwipeHorizontalMinInertia: "=",
-            forceArrows: "@"
-        },
         link: function(scope, elem, attrs) {
-            var $dsh, $parent, arrowInner, forceArrows, lArrow, rArrow;
+            var $dsh, start;
+            scope.$watch(attrs.ngDragSwipeHorizontalMinDistance, function(newValue, oldValue) {
+                return scope.ngDragSwipeHorizontalMinDistance = newValue;
+            });
+            scope.$watch(attrs.ngDragSwipeHorizontalMinInertia, function(newValue, oldValue) {
+                return scope.ngDragSwipeHorizontalMinInertia = newValue;
+            });
+            scope.forceArrows = attrs.forceArrows;
+            scope.lcCarouselHorizontal = attrs.lcCarouselHorizontal;
             $dsh = $ngDragSwipeHorizontal();
-            $dsh.bind(elem, attrs, true);
-            $parent = elem.parent();
-            forceArrows = attrs.forceArrows;
-            arrowInner = $("<div/>").css({
-                display: "table-cell",
-                verticalAlign: "middle",
-                height: $parent.height()
-            });
-            lArrow = $('<div class="arrow" ng-click="prevCarouselSlide()" />').css({
-                position: "absolute",
-                top: 0,
-                left: 0,
-                height: $parent.height(),
-                padding: "0 10px",
-                cursor: "pointer"
-            }).append(arrowInner.clone().append('<i class="icon-chevron-sign-left"></i>'));
-            rArrow = $('<div class="arrow" ng-click="nextCarouselSlide()" />').css({
-                position: "absolute",
-                top: 0,
-                right: 0,
-                height: $parent.height(),
-                display: "table-cell",
-                verticalAlign: "middle",
-                padding: "0 10px",
-                cursor: "pointer"
-            }).append(arrowInner.clone().append('<i class="icon-chevron-sign-right"></i>'));
-            $parent.css({
-                position: "relative"
-            });
-            if (typeof window.ontouchstart === "undefined") {
-                $parent.append($compile(lArrow)(scope));
-                $parent.append($compile(rArrow)(scope));
-            }
-            elem.css({
-                width: $parent.width() * elem.children().length,
-                height: $parent.height(),
-                display: "block"
-            }).children().css({
-                width: $parent.width(),
-                height: $parent.height(),
-                display: "block",
-                "float": "left"
-            });
-            scope.nextCarouselSlide = function() {
+            scope.items = scope.$parent.$eval(scope.lcCarouselHorizontal);
+            start = function() {
+                var $parent, arrowInner, forceArrows, lArrow, rArrow;
+                $dsh.bind(elem, attrs, true);
+                $parent = elem.parent();
+                forceArrows = attrs.forceArrows;
+                scope.carouselWidth = $parent.width();
+                scope.carouselHeight = $parent.height();
+                arrowInner = $("<div/>").css({
+                    display: "table-cell",
+                    verticalAlign: "middle",
+                    height: $parent.height()
+                });
+                lArrow = $('<div class="arrow" ng-click="prevCarouselSlide()" />').css({
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    height: $parent.height(),
+                    padding: "0 10px",
+                    cursor: "pointer"
+                }).append(arrowInner.clone().append('<i class="icon-chevron-sign-left"></i>'));
+                rArrow = $('<div class="arrow" ng-click="nextCarouselSlide()" />').css({
+                    position: "absolute",
+                    top: 0,
+                    right: 0,
+                    height: $parent.height(),
+                    display: "table-cell",
+                    verticalAlign: "middle",
+                    padding: "0 10px",
+                    cursor: "pointer"
+                }).append(arrowInner.clone().append('<i class="icon-chevron-sign-right"></i>'));
+                $parent.css({
+                    position: "relative"
+                });
+                elem.css({
+                    width: $parent.width() * elem.children().length,
+                    height: $parent.height(),
+                    display: "block"
+                });
+                scope.nextCarouselSlide = function() {
+                    return $timeout(function() {
+                        $dsh.next();
+                        return scope.$emit("event:lcCarouselNext", elem);
+                    }, 1);
+                };
+                scope.prevCarouselSlide = function() {
+                    return $timeout(function() {
+                        $dsh.previous();
+                        return scope.$emit("event:lcCarouselPrevious", elem);
+                    }, 1);
+                };
                 return $timeout(function() {
-                    return $dsh.next(elem, attrs);
-                }, 1);
+                    $dsh.resetOrder();
+                    if (typeof window.ontouchstart === "undefined" && elem.children().length > 2) {
+                        $parent.append($compile(lArrow)(scope));
+                        return $parent.append($compile(rArrow)(scope));
+                    }
+                }, 10);
             };
-            return scope.prevCarouselSlide = function() {
-                return $timeout(function() {
-                    return $dsh.previous(elem, attrs);
-                }, 1);
-            };
+            return $timeout(start, 1);
         }
     };
 } ]);
