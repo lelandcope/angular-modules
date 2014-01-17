@@ -461,7 +461,10 @@ lcTouch.directive 'lcCarouselHorizontal', ['$ngDragSwipeHorizontal', '$compile',
 			scope.lcCarouselHorizontal 	= attrs.lcCarouselHorizontal
 
 			$dsh = $ngDragSwipeHorizontal()
-			scope.items = scope.$parent.$eval(scope.lcCarouselHorizontal)
+			scope.items = scope.$eval(attrs.lcCarouselHorizontal)
+
+			scope.itemsRendered = ()->
+				start()
 
 			start = ()->
 				$dsh.bind elem, attrs, true
@@ -508,6 +511,7 @@ lcTouch.directive 'lcCarouselHorizontal', ['$ngDragSwipeHorizontal', '$compile',
 					width: $parent.width()*elem.children().length
 					height: $parent.height()
 					display: 'block'
+					opacity: 0
 
 
 				# Scope Functions
@@ -529,11 +533,25 @@ lcTouch.directive 'lcCarouselHorizontal', ['$ngDragSwipeHorizontal', '$compile',
 					if typeof(window.ontouchstart) is 'undefined' and elem.children().length > 2
 						$parent.append $compile(lArrow)(scope)
 						$parent.append $compile(rArrow)(scope)
-				, 10
+
+					elem.animate { opacity: 1 }, 300
+				, 999
 
 
 
-			$timeout start, 1
+			# $timeout start, 1
+	}
+]
+
+lcTouch.directive 'lcCarouselItemsRendered', ['$timeout', ($timeout)->
+	return {
+		restrict: 'A'
+		link: (scope, elem, attrs)->
+			if scope.$last is true
+				elem.ready ()->
+					$timeout ()->
+						scope.$apply attrs["lcCarouselItemsRendered"]
+					, 200
 	}
 ]
 

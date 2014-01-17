@@ -1,7 +1,7 @@
 /*! 
- lcTouch v0.4.12 
+ lcTouch v0.4.17 
  Author: Leland Cope @lelandcope 
- 2014-01-15 
+ 2014-01-17 
  */
 
 var lcTouch;
@@ -509,8 +509,11 @@ lcTouch.directive("lcCarouselHorizontal", [ "$ngDragSwipeHorizontal", "$compile"
             scope.forceArrows = attrs.forceArrows;
             scope.lcCarouselHorizontal = attrs.lcCarouselHorizontal;
             $dsh = $ngDragSwipeHorizontal();
-            scope.items = scope.$parent.$eval(scope.lcCarouselHorizontal);
-            start = function() {
+            scope.items = scope.$eval(attrs.lcCarouselHorizontal);
+            scope.itemsRendered = function() {
+                return start();
+            };
+            return start = function() {
                 var $parent, arrowInner, forceArrows, lArrow, rArrow;
                 $dsh.bind(elem, attrs, true);
                 $parent = elem.parent();
@@ -546,7 +549,8 @@ lcTouch.directive("lcCarouselHorizontal", [ "$ngDragSwipeHorizontal", "$compile"
                 elem.css({
                     width: $parent.width() * elem.children().length,
                     height: $parent.height(),
-                    display: "block"
+                    display: "block",
+                    opacity: 0
                 });
                 scope.nextCarouselSlide = function() {
                     return $timeout(function() {
@@ -564,11 +568,28 @@ lcTouch.directive("lcCarouselHorizontal", [ "$ngDragSwipeHorizontal", "$compile"
                     $dsh.resetOrder();
                     if (typeof window.ontouchstart === "undefined" && elem.children().length > 2) {
                         $parent.append($compile(lArrow)(scope));
-                        return $parent.append($compile(rArrow)(scope));
+                        $parent.append($compile(rArrow)(scope));
                     }
-                }, 10);
+                    return elem.animate({
+                        opacity: 1
+                    }, 300);
+                }, 999);
             };
-            return $timeout(start, 1);
+        }
+    };
+} ]);
+
+lcTouch.directive("lcCarouselItemsRendered", [ "$timeout", function($timeout) {
+    return {
+        restrict: "A",
+        link: function(scope, elem, attrs) {
+            if (scope.$last === true) {
+                return elem.ready(function() {
+                    return $timeout(function() {
+                        return scope.$apply(attrs["lcCarouselItemsRendered"]);
+                    }, 200);
+                });
+            }
         }
     };
 } ]);
