@@ -1,7 +1,7 @@
 /*! 
- lcTouch v0.4.17 
+ lcTouch v0.4.19 
  Author: Leland Cope @lelandcope 
- 2014-01-17 
+ 2014-01-20 
  */
 
 var lcTouch;
@@ -508,6 +508,8 @@ lcTouch.directive("lcCarouselHorizontal", [ "$ngDragSwipeHorizontal", "$compile"
             });
             scope.forceArrows = attrs.forceArrows;
             scope.lcCarouselHorizontal = attrs.lcCarouselHorizontal;
+            scope.carouselWidth = "0px";
+            scope.carouselHeight = "0px";
             $dsh = $ngDragSwipeHorizontal();
             scope.items = scope.$eval(attrs.lcCarouselHorizontal);
             scope.itemsRendered = function() {
@@ -518,8 +520,8 @@ lcTouch.directive("lcCarouselHorizontal", [ "$ngDragSwipeHorizontal", "$compile"
                 $dsh.bind(elem, attrs, true);
                 $parent = elem.parent();
                 forceArrows = attrs.forceArrows;
-                scope.carouselWidth = $parent.width();
-                scope.carouselHeight = $parent.height();
+                scope.carouselWidth = $parent.width() + "px";
+                scope.carouselHeight = $parent.height() + "px";
                 arrowInner = $("<div/>").css({
                     display: "table-cell",
                     verticalAlign: "middle",
@@ -564,6 +566,9 @@ lcTouch.directive("lcCarouselHorizontal", [ "$ngDragSwipeHorizontal", "$compile"
                         return scope.$emit("event:lcCarouselPrevious", elem);
                     }, 1);
                 };
+                $timeout(function() {
+                    return scope.$apply();
+                }, 100);
                 return $timeout(function() {
                     $dsh.resetOrder();
                     if (typeof window.ontouchstart === "undefined" && elem.children().length > 2) {

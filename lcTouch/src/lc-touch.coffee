@@ -459,6 +459,8 @@ lcTouch.directive 'lcCarouselHorizontal', ['$ngDragSwipeHorizontal', '$compile',
 
 			scope.forceArrows 			= attrs.forceArrows
 			scope.lcCarouselHorizontal 	= attrs.lcCarouselHorizontal
+			scope.carouselWidth			= '0px'
+			scope.carouselHeight		= '0px'
 
 			$dsh = $ngDragSwipeHorizontal()
 			scope.items = scope.$eval(attrs.lcCarouselHorizontal)
@@ -472,8 +474,8 @@ lcTouch.directive 'lcCarouselHorizontal', ['$ngDragSwipeHorizontal', '$compile',
 				$parent = elem.parent()
 				forceArrows = attrs.forceArrows
 
-				scope.carouselWidth = $parent.width()
-				scope.carouselHeight = $parent.height()
+				scope.carouselWidth  = $parent.width()+'px'
+				scope.carouselHeight = $parent.height()+'px'
 
 				arrowInner = $('<div/>').css
 					display: 'table-cell'
@@ -526,6 +528,10 @@ lcTouch.directive 'lcCarouselHorizontal', ['$ngDragSwipeHorizontal', '$compile',
 						$dsh.previous()
 						scope.$emit('event:lcCarouselPrevious', elem)
 					, 1
+
+				$timeout ()->
+					scope.$apply()
+				, 100
 
 				$timeout ()->
 					$dsh.resetOrder()
