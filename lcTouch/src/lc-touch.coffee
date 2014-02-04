@@ -450,13 +450,6 @@ lcTouch.directive 'lcCarouselHorizontal', ['$ngDragSwipeHorizontal', '$compile',
 	return {
 		restrict: 'A'
 		link: (scope, elem, attrs)->
-			# $watch functions
-			scope.$watch attrs.ngDragSwipeHorizontalMinDistance, (newValue, oldValue)->
-				scope.ngDragSwipeHorizontalMinDistance = newValue
-
-			scope.$watch attrs.ngDragSwipeHorizontalMinInertia, (newValue, oldValue)->
-				scope.ngDragSwipeHorizontalMinInertia = newValue
-
 			scope.forceArrows 			= attrs.forceArrows
 			scope.lcCarouselHorizontal 	= attrs.lcCarouselHorizontal
 			scope.carouselWidth			= '0px'
@@ -466,7 +459,7 @@ lcTouch.directive 'lcCarouselHorizontal', ['$ngDragSwipeHorizontal', '$compile',
 			scope.items = scope.$eval(attrs.lcCarouselHorizontal)
 
 			scope.itemsRendered = ()->
-				start()
+				$timeout start, 100
 
 			start = ()->
 				$dsh.bind elem, attrs, true
@@ -488,7 +481,7 @@ lcTouch.directive 'lcCarouselHorizontal', ['$ngDragSwipeHorizontal', '$compile',
 					top: 0
 					left: 0
 					height: $parent.height()
-					padding: '0 10px'
+					padding: '0 0 0 10px'
 					cursor: 'pointer'
 				.append arrowInner.clone()
 				.append '<i class="icon-chevron-sign-left"></i>'
@@ -501,7 +494,7 @@ lcTouch.directive 'lcCarouselHorizontal', ['$ngDragSwipeHorizontal', '$compile',
 					height: $parent.height()
 					display: 'table-cell'
 					verticalAlign: 'middle'
-					padding: '0 10px'
+					padding: '0 10px 0 0'
 					cursor: 'pointer'
 				.append arrowInner.clone()
 				.append '<i class="icon-chevron-sign-right"></i>'

@@ -1,7 +1,7 @@
 /*! 
- lcTouch v0.4.19 
+ lcTouch v0.4.21 
  Author: Leland Cope @lelandcope 
- 2014-01-20 
+ 2014-01-31 
  */
 
 var lcTouch;
@@ -500,12 +500,6 @@ lcTouch.directive("lcCarouselHorizontal", [ "$ngDragSwipeHorizontal", "$compile"
         restrict: "A",
         link: function(scope, elem, attrs) {
             var $dsh, start;
-            scope.$watch(attrs.ngDragSwipeHorizontalMinDistance, function(newValue, oldValue) {
-                return scope.ngDragSwipeHorizontalMinDistance = newValue;
-            });
-            scope.$watch(attrs.ngDragSwipeHorizontalMinInertia, function(newValue, oldValue) {
-                return scope.ngDragSwipeHorizontalMinInertia = newValue;
-            });
             scope.forceArrows = attrs.forceArrows;
             scope.lcCarouselHorizontal = attrs.lcCarouselHorizontal;
             scope.carouselWidth = "0px";
@@ -513,7 +507,7 @@ lcTouch.directive("lcCarouselHorizontal", [ "$ngDragSwipeHorizontal", "$compile"
             $dsh = $ngDragSwipeHorizontal();
             scope.items = scope.$eval(attrs.lcCarouselHorizontal);
             scope.itemsRendered = function() {
-                return start();
+                return $timeout(start, 100);
             };
             return start = function() {
                 var $parent, arrowInner, forceArrows, lArrow, rArrow;
@@ -532,7 +526,7 @@ lcTouch.directive("lcCarouselHorizontal", [ "$ngDragSwipeHorizontal", "$compile"
                     top: 0,
                     left: 0,
                     height: $parent.height(),
-                    padding: "0 10px",
+                    padding: "0 0 0 10px",
                     cursor: "pointer"
                 }).append(arrowInner.clone().append('<i class="icon-chevron-sign-left"></i>'));
                 rArrow = $('<div class="arrow" ng-click="nextCarouselSlide()" />').css({
@@ -542,7 +536,7 @@ lcTouch.directive("lcCarouselHorizontal", [ "$ngDragSwipeHorizontal", "$compile"
                     height: $parent.height(),
                     display: "table-cell",
                     verticalAlign: "middle",
-                    padding: "0 10px",
+                    padding: "0 10px 0 0",
                     cursor: "pointer"
                 }).append(arrowInner.clone().append('<i class="icon-chevron-sign-right"></i>'));
                 $parent.css({
