@@ -136,14 +136,14 @@ lcTouch.directive 'ngTapOutside', ['$timeout', ($timeout)->
 			scope.$watch attrs.when, (newValue, oldValue)->
 				if newValue is true
 					$timeout ()->
-						elem.bind 'touchstart click', onElementTouchStart
-						$('html').bind 'touchend click', onTouchEnd
+						elem.bind 'touchstart mousedown', onElementTouchStart
+						$('html').bind 'touchend mouseup', onTouchEnd
 				else
-					elem.unbind 'touchstart click', onElementTouchStart
-					$('html').unbind 'touchend click', onTouchEnd
+					elem.unbind 'touchstart mousedown', onElementTouchStart
+					$('html').unbind 'touchend mouseup', onTouchEnd
 		else
-			elem.bind 'touchstart click', onElementTouchStart
-			$('html').bind 'touchend click', onTouchEnd
+			elem.bind 'touchstart mousedown', onElementTouchStart
+			$('html').bind 'touchend mouseup', onTouchEnd
 
 
 		# JS Functions

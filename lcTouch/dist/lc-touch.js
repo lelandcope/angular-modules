@@ -1,7 +1,7 @@
 /*! 
- lcTouch v0.4.21 
+ lcTouch v0.4.22 
  Author: Leland Cope @lelandcope 
- 2014-01-31 
+ 2014-02-17 
  */
 
 var lcTouch;
@@ -145,17 +145,17 @@ lcTouch.directive("ngTapOutside", [ "$timeout", function($timeout) {
             scope.$watch(attrs.when, function(newValue, oldValue) {
                 if (newValue === true) {
                     return $timeout(function() {
-                        elem.bind("touchstart click", onElementTouchStart);
-                        return $("html").bind("touchend click", onTouchEnd);
+                        elem.bind("touchstart mousedown", onElementTouchStart);
+                        return $("html").bind("touchend mouseup", onTouchEnd);
                     });
                 } else {
-                    elem.unbind("touchstart click", onElementTouchStart);
-                    return $("html").unbind("touchend click", onTouchEnd);
+                    elem.unbind("touchstart mousedown", onElementTouchStart);
+                    return $("html").unbind("touchend mouseup", onTouchEnd);
                 }
             });
         } else {
-            elem.bind("touchstart click", onElementTouchStart);
-            $("html").bind("touchend click", onTouchEnd);
+            elem.bind("touchstart mousedown", onElementTouchStart);
+            $("html").bind("touchend mouseup", onTouchEnd);
         }
         onTouchEnd = function(event) {
             if (!stopEvent) {
