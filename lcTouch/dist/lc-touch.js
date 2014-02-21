@@ -1,7 +1,7 @@
 /*! 
- lcTouch v0.4.22 
+ lcTouch v0.4.23 
  Author: Leland Cope @lelandcope 
- 2014-02-17 
+ 2014-02-21 
  */
 
 var lcTouch;
@@ -499,18 +499,20 @@ lcTouch.directive("lcCarouselHorizontal", [ "$ngDragSwipeHorizontal", "$compile"
     return {
         restrict: "A",
         link: function(scope, elem, attrs) {
-            var $dsh, start;
+            var $dsh, autoScrollTimeout, autoScrollUntilClick, start;
             scope.forceArrows = attrs.forceArrows;
             scope.lcCarouselHorizontal = attrs.lcCarouselHorizontal;
             scope.carouselWidth = "0px";
             scope.carouselHeight = "0px";
+            autoScrollUntilClick = scope.$eval(attrs.lcCarouselAutoScroll) || false;
+            autoScrollTimeout = null;
             $dsh = $ngDragSwipeHorizontal();
             scope.items = scope.$eval(attrs.lcCarouselHorizontal);
             scope.itemsRendered = function() {
                 return $timeout(start, 100);
             };
             return start = function() {
-                var $parent, arrowInner, forceArrows, lArrow, rArrow;
+                var $parent, arrowInner, autoScroll, forceArrows, lArrow, rArrow;
                 $dsh.bind(elem, attrs, true);
                 $parent = elem.parent();
                 forceArrows = attrs.forceArrows;
@@ -548,31 +550,47 @@ lcTouch.directive("lcCarouselHorizontal", [ "$ngDragSwipeHorizontal", "$compile"
                     display: "block",
                     opacity: 0
                 });
-                scope.nextCarouselSlide = function() {
-                    return $timeout(function() {
-                        $dsh.next();
-                        return scope.$emit("event:lcCarouselNext", elem);
-                    }, 1);
-                };
-                scope.prevCarouselSlide = function() {
-                    return $timeout(function() {
-                        $dsh.previous();
-                        return scope.$emit("event:lcCarouselPrevious", elem);
-                    }, 1);
-                };
                 $timeout(function() {
                     return scope.$apply();
                 }, 100);
-                return $timeout(function() {
+                $timeout(function() {
                     $dsh.resetOrder();
                     if (typeof window.ontouchstart === "undefined" && elem.children().length > 2) {
                         $parent.append($compile(lArrow)(scope));
                         $parent.append($compile(rArrow)(scope));
                     }
-                    return elem.animate({
+                    elem.animate({
                         opacity: 1
                     }, 300);
+                    if (autoScrollUntilClick) {
+                        return autoScrollTimeout = $timeout(autoScroll, autoScrollUntilClick);
+                    }
                 }, 999);
+                autoScroll = function() {
+                    $timeout.cancel(autoScrollTimeout);
+                    scope.nextCarouselSlide(false);
+                    return autoScrollTimeout = $timeout(autoScroll, autoScrollUntilClick);
+                };
+                scope.nextCarouselSlide = function(cancelAutoScroll) {
+                    cancelAutoScroll || (cancelAutoScroll = true);
+                    if (cancelAutoScroll) {
+                        $timeout.cancel(autoScrollTimeout);
+                    }
+                    return $timeout(function() {
+                        $dsh.next();
+                        return scope.$emit("event:lcCarouselNext", elem);
+                    }, 1);
+                };
+                return scope.prevCarouselSlide = function(cancelAutoScroll) {
+                    cancelAutoScroll || (cancelAutoScroll = true);
+                    if (cancelAutoScroll) {
+                        $timeout.cancel(autoScrollTimeout);
+                    }
+                    return $timeout(function() {
+                        $dsh.previous();
+                        return scope.$emit("event:lcCarouselPrevious", elem);
+                    }, 1);
+                };
             };
         }
     };

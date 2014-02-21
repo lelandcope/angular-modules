@@ -455,6 +455,9 @@ lcTouch.directive 'lcCarouselHorizontal', ['$ngDragSwipeHorizontal', '$compile',
 			scope.carouselWidth			= '0px'
 			scope.carouselHeight		= '0px'
 
+			autoScrollUntilClick = scope.$eval(attrs.lcCarouselAutoScroll) or false
+			autoScrollTimeout = null
+
 			$dsh = $ngDragSwipeHorizontal()
 			scope.items = scope.$eval(attrs.lcCarouselHorizontal)
 
@@ -508,20 +511,6 @@ lcTouch.directive 'lcCarouselHorizontal', ['$ngDragSwipeHorizontal', '$compile',
 					display: 'block'
 					opacity: 0
 
-
-				# Scope Functions
-				scope.nextCarouselSlide = ()->
-					$timeout ()->
-						$dsh.next()
-						scope.$emit('event:lcCarouselNext', elem)
-					, 1
-
-				scope.prevCarouselSlide = ()->
-					$timeout ()->
-						$dsh.previous()
-						scope.$emit('event:lcCarouselPrevious', elem)
-					, 1
-
 				$timeout ()->
 					scope.$apply()
 				, 100
@@ -534,7 +523,43 @@ lcTouch.directive 'lcCarouselHorizontal', ['$ngDragSwipeHorizontal', '$compile',
 						$parent.append $compile(rArrow)(scope)
 
 					elem.animate { opacity: 1 }, 300
+
+					if autoScrollUntilClick
+						autoScrollTimeout = $timeout autoScroll, autoScrollUntilClick
 				, 999
+
+
+				# Functions
+				autoScroll = ()->
+					$timeout.cancel autoScrollTimeout
+					scope.nextCarouselSlide(false)
+
+					autoScrollTimeout = $timeout autoScroll, autoScrollUntilClick
+
+
+
+				# Scope Functions
+				scope.nextCarouselSlide = (cancelAutoScroll)->
+					cancelAutoScroll or= true
+
+					if cancelAutoScroll
+						$timeout.cancel autoScrollTimeout
+
+					$timeout ()->
+						$dsh.next()
+						scope.$emit('event:lcCarouselNext', elem)
+					, 1
+
+				scope.prevCarouselSlide = (cancelAutoScroll)->
+					cancelAutoScroll or= true
+
+					if cancelAutoScroll
+						$timeout.cancel autoScrollTimeout
+
+					$timeout ()->
+						$dsh.previous()
+						scope.$emit('event:lcCarouselPrevious', elem)
+					, 1
 
 
 
