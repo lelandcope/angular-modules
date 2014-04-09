@@ -1,7 +1,7 @@
 /*! 
- lcTouch v0.4.23 
+ lcTouch v0.5.0 
  Author: Leland Cope @lelandcope 
- 2014-02-21 
+ 2014-04-08 
  */
 
 var lcTouch;
@@ -9,16 +9,16 @@ var lcTouch;
 lcTouch = angular.module("lcTouch", []);
 
 /*
-	ngTap Directive
+    ngTap Directive
 
-	Description: A replacement for ngClick. This directive will take into account taps and clicks so it
-	will work for both mobile and desktop browsers.
+    Description: A replacement for ngClick. This directive will take into account taps and clicks so it
+    will work for both mobile and desktop browsers.
 
-	Parameters:
-	- ngTap - {string} - An expression representing what you would like to do when the element is tapped or clicked
+    Parameters:
+    - ngTap - {string} - An expression representing what you would like to do when the element is tapped or clicked
 
-	Usage:
-	<button type="button" ng-tap="doSomething()">Click Me</button>
+    Usage:
+    <button type="button" ng-tap="doSomething()">Click Me</button>
 */
 lcTouch.directive("ngTap", [ "$timeout", function($timeout) {
     return function(scope, elem, attrs) {
@@ -68,13 +68,13 @@ lcTouch.directive("ngTap", [ "$timeout", function($timeout) {
 } ]);
 
 /*
-	ngDbltap
+    ngDbltap
 
-	Description: A replacement for ngDblclick. This directive will take into account taps and clicks so it
-	will work for both mobile and desktop browsers.
+    Description: A replacement for ngDblclick. This directive will take into account taps and clicks so it
+    will work for both mobile and desktop browsers.
 
-	Usage:
-	<button type="button" ng-dbltap="doSomething()">Click Me</button>
+    Usage:
+    <button type="button" ng-dbltap="doSomething()">Click Me</button>
 */
 lcTouch.directive("ngDbltap", [ "$timeout", function($timeout) {
     return function(scope, elem, attrs) {
@@ -129,13 +129,13 @@ lcTouch.directive("ngDbltap", [ "$timeout", function($timeout) {
 } ]);
 
 /*
-	ngTapOutside
+    ngTapOutside
 
-	Description: A directive that listens when a user clicks or taps
-	outside the area.
+    Description: A directive that listens when a user clicks or taps
+    outside the area.
 
-	Usage:
-	<button type="button" ng-tap-outside="closeDropdown()">Show Dropdown</button>
+    Usage:
+    <button type="button" ng-tap-outside="closeDropdown()">Show Dropdown</button>
 */
 lcTouch.directive("ngTapOutside", [ "$timeout", function($timeout) {
     return function(scope, elem, attrs) {
@@ -177,14 +177,14 @@ lcTouch.directive("ngTapOutside", [ "$timeout", function($timeout) {
 } ]);
 
 /*
-	ngSwipeDown, ngSwipeUp, ngSwipeLeft, ngSwipeRight
+    ngSwipeDown, ngSwipeUp, ngSwipeLeft, ngSwipeRight
 
-	Description: Adds swipe directives
+    Description: Adds swipe directives
 
-	Usage:
-	<div ng-swipe-down="onswipedown()">
-		...... HTML ......
-	</div>
+    Usage:
+    <div ng-swipe-down="onswipedown()">
+        ...... HTML ......
+    </div>
 */
 lcTouch.factory("$swipe", [ function() {
     return {
@@ -311,9 +311,9 @@ lcTouch.directive("ngSwipeLeft", [ "$swipe", function($swipe) {
 } ]);
 
 /*
-	ngDragSwipeHorizontal
+    ngDragSwipeHorizontal
 
-	Description: Drag Swipe Horizontally
+    Description: Drag Swipe Horizontally
 */
 lcTouch.factory("$ngDragSwipeHorizontal", [ "$swipe", "$timeout", function($swipe, $timeout) {
     var DSH, cleanArray, notInArray;
@@ -351,8 +351,8 @@ lcTouch.factory("$ngDragSwipeHorizontal", [ "$swipe", "$timeout", function($swip
         DSH.prototype.animating = false;
         DSH.prototype.elem = null;
         DSH.prototype.attrs = null;
-        DSH.prototype.bind = function(elem, attrs, infScroll) {
-            var onend, onmove, onstart, self;
+        DSH.prototype.bind = function(scope, elem, attrs, infScroll) {
+            var isHorizontalScroll, isVerticalScroll, onend, onmove, onstart, self, threshold, xStart, yStart;
             self = this;
             self.elem = elem;
             self.attrs = attrs;
@@ -361,8 +361,17 @@ lcTouch.factory("$ngDragSwipeHorizontal", [ "$swipe", "$timeout", function($swip
             self.minDistance = attrs.ngDragSwipeHorizontalMinDistance || self.wrapperWidth * .5;
             self.minInertia = attrs.ngDragSwipeHorizontalMinInertia || .65;
             self.infiniteScroll = infScroll || false;
+            threshold = 20;
+            isVerticalScroll = false;
+            isHorizontalScroll = false;
+            xStart = null;
+            yStart = null;
             onstart = function(el, amounts, e) {
                 e.stopPropagation();
+                isVerticalScroll = false;
+                isHorizontalScroll = false;
+                xStart = amounts[0];
+                yStart = amounts[1];
                 return $(e.currentTarget).data("touchStart", {
                     x: amounts[0],
                     y: amounts[1],
@@ -400,14 +409,25 @@ lcTouch.factory("$ngDragSwipeHorizontal", [ "$swipe", "$timeout", function($swip
             onmove = function(el, amounts, e) {
                 var placement, startEvent;
                 e.stopPropagation();
+                if (Math.abs(yStart - amounts[1]) > threshold && !isHorizontalScroll) {
+                    isVerticalScroll = true;
+                }
+                if (Math.abs(xStart - amounts[0]) > threshold && !isVerticalScroll) {
+                    isHorizontalScroll = true;
+                }
+                if (!isHorizontalScroll) {
+                    return;
+                }
+                e.preventDefault();
                 startEvent = $(e.currentTarget).data("touchStart");
                 placement = amounts[0] - startEvent.x + self.offset * -self.wrapperWidth;
                 if (placement <= 0 && placement >= (self.totalChildren - 1) * -self.wrapperWidth) {
                     self.movable = cleanArray([ self.elem.children()[self.offset], self.elem.children()[self.offset - 1], self.elem.children()[self.offset + 1] ]);
-                    return $(self.movable).css({
+                    $(self.movable).css({
                         x: placement + "px"
                     });
                 }
+                return scope.$broadcast("event:lcCarouselStopAutoScroll");
             };
             if (self.infiniteScroll) {
                 self.resetOrder();
@@ -491,9 +511,9 @@ lcTouch.directive("ngDragSwipeHorizontal", [ "$ngDragSwipeHorizontal", function(
 } ]);
 
 /*
-	lcCarouselHorizontal
+    lcCarouselHorizontal
 
-	Description: Horizontal Carousel
+    Description: Horizontal Carousel
 */
 lcTouch.directive("lcCarouselHorizontal", [ "$ngDragSwipeHorizontal", "$compile", "$timeout", function($ngDragSwipeHorizontal, $compile, $timeout) {
     return {
@@ -513,7 +533,7 @@ lcTouch.directive("lcCarouselHorizontal", [ "$ngDragSwipeHorizontal", "$compile"
             };
             return start = function() {
                 var $parent, arrowInner, autoScroll, forceArrows, lArrow, rArrow;
-                $dsh.bind(elem, attrs, true);
+                $dsh.bind(scope, elem, attrs, true);
                 $parent = elem.parent();
                 forceArrows = attrs.forceArrows;
                 scope.carouselWidth = $parent.width() + "px";
@@ -523,7 +543,7 @@ lcTouch.directive("lcCarouselHorizontal", [ "$ngDragSwipeHorizontal", "$compile"
                     verticalAlign: "middle",
                     height: $parent.height()
                 });
-                lArrow = $('<div class="arrow" ng-click="prevCarouselSlide()" />').css({
+                lArrow = $('<div class="arrow" ng-tap="prevCarouselSlide()" />').css({
                     position: "absolute",
                     top: 0,
                     left: 0,
@@ -531,7 +551,7 @@ lcTouch.directive("lcCarouselHorizontal", [ "$ngDragSwipeHorizontal", "$compile"
                     padding: "0 0 0 10px",
                     cursor: "pointer"
                 }).append(arrowInner.clone().append('<i class="icon-chevron-sign-left"></i>'));
-                rArrow = $('<div class="arrow" ng-click="nextCarouselSlide()" />').css({
+                rArrow = $('<div class="arrow" ng-tap="nextCarouselSlide()" />').css({
                     position: "absolute",
                     top: 0,
                     right: 0,
@@ -555,7 +575,7 @@ lcTouch.directive("lcCarouselHorizontal", [ "$ngDragSwipeHorizontal", "$compile"
                 }, 100);
                 $timeout(function() {
                     $dsh.resetOrder();
-                    if (typeof window.ontouchstart === "undefined" && elem.children().length > 2) {
+                    if (elem.children().length > 2) {
                         $parent.append($compile(lArrow)(scope));
                         $parent.append($compile(rArrow)(scope));
                     }
@@ -572,25 +592,36 @@ lcTouch.directive("lcCarouselHorizontal", [ "$ngDragSwipeHorizontal", "$compile"
                     return autoScrollTimeout = $timeout(autoScroll, autoScrollUntilClick);
                 };
                 scope.nextCarouselSlide = function(cancelAutoScroll) {
-                    cancelAutoScroll || (cancelAutoScroll = true);
+                    if (cancelAutoScroll === void 0) {
+                        cancelAutoScroll = true;
+                    }
                     if (cancelAutoScroll) {
                         $timeout.cancel(autoScrollTimeout);
                     }
                     return $timeout(function() {
                         $dsh.next();
-                        return scope.$emit("event:lcCarouselNext", elem);
+                        if (cancelAutoScroll) {
+                            return scope.$emit("event:lcCarouselNext", elem);
+                        }
                     }, 1);
                 };
-                return scope.prevCarouselSlide = function(cancelAutoScroll) {
-                    cancelAutoScroll || (cancelAutoScroll = true);
+                scope.prevCarouselSlide = function(cancelAutoScroll) {
+                    if (cancelAutoScroll === void 0) {
+                        cancelAutoScroll = true;
+                    }
                     if (cancelAutoScroll) {
                         $timeout.cancel(autoScrollTimeout);
                     }
                     return $timeout(function() {
                         $dsh.previous();
-                        return scope.$emit("event:lcCarouselPrevious", elem);
+                        if (cancelAutoScroll) {
+                            return scope.$emit("event:lcCarouselPrevious", elem);
+                        }
                     }, 1);
                 };
+                return scope.$on("event:lcCarouselStopAutoScroll", function(e) {
+                    return $timeout.cancel(autoScrollTimeout);
+                });
             };
         }
     };

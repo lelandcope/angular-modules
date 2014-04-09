@@ -2,7 +2,7 @@
  infinteScroll v0.0.3 
  Author: Leland Cope @lelandcope 
  URL: https://github.com/lelandcope/angular-modules/tree/master/infinteScroll 
- 2013-09-18 
+ 2014-03-31 
  */
 
 "use strict";
