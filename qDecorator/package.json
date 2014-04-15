@@ -1,6 +1,6 @@
 {
   "name": "qDecorator",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Adds success and error callbacks to the $q service in Angular JS.",
   "main": "qdecorator.js",
   "scripts": {

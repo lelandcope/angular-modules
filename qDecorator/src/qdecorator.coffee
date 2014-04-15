@@ -21,6 +21,8 @@ angularQDecorator.config ['$provide', ($provide)->
 				deferred.promise.then null, (response)->
 					if cb then cb response
 
+				deferred.promise
+
 			deferred
 
 		$delegate

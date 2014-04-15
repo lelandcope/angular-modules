@@ -1,9 +1,9 @@
 /*! 
- qDecorator v1.0.0 
+ qDecorator v1.1.0 
  Description: Adds success and error callbacks to the $q service in Angular JS. 
  Author: Leland Cope @lelandcope 
  URL: https://github.com/lelandcope/angular-modules/tree/master/qDecorator 
- 2013-10-04 
+ 2014-04-14 
  */
 
 "use strict";
@@ -28,11 +28,12 @@ angularQDecorator.config([ "$provide", function($provide) {
                 return deferred.promise;
             };
             deferred.promise.error = function(cb) {
-                return deferred.promise.then(null, function(response) {
+                deferred.promise.then(null, function(response) {
                     if (cb) {
                         return cb(response);
                     }
                 });
+                return deferred.promise;
             };
             return deferred;
         };
