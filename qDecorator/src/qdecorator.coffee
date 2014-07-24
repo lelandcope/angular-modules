@@ -23,6 +23,12 @@ angularQDecorator.config ['$provide', ($provide)->
 
 				deferred.promise
 
+			deferred.promise.notify = (cb)->
+				deferred.promise.then null, null, (response)->
+					if cb then cb response
+
+				deferred.promise
+
 			deferred
 
 		$delegate
