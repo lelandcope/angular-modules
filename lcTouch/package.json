@@ -1,6 +1,6 @@
 {
   "name": "lcTouch",
-  "version": "0.5.0",
+  "version": "0.5.3",
   "description": "ERROR: No README.md file found!",
   "repository": "",
   "author": "Leland Cope @lelandcope",
@@ -9,6 +9,6 @@
     "grunt": "~0.4.1",
     "grunt-contrib-coffee": "~0.7.0",
     "grunt-contrib-uglify": "~0.2.4",
-    "grunt-bump": "0.0.13"
+    "grunt-vbump": "0.0.5"
   }
 }

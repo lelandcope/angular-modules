@@ -321,14 +321,13 @@ lcTouch.factory '$ngDragSwipeHorizontal', ['$swipe', '$timeout', ($swipe, $timeo
         attrs: null
 
         bind: (scope, elem, attrs, infScroll)->
-            self                = @
-            self.elem           = elem
-            self.attrs          = attrs
-            self.totalChildren  = self.elem.children().length
-            self.wrapperWidth   = self.elem.parent().width()
-            self.minDistance    = attrs.ngDragSwipeHorizontalMinDistance or self.wrapperWidth*0.5
-            self.minInertia     = attrs.ngDragSwipeHorizontalMinInertia or 0.65
-            self.infiniteScroll = infScroll or false
+            @elem           = elem
+            @attrs          = attrs
+            @totalChildren  = @elem.children().length
+            @wrapperWidth   = @elem.parent().width()
+            @minDistance    = attrs.ngDragSwipeHorizontalMinDistance or @wrapperWidth*0.5
+            @minInertia     = attrs.ngDragSwipeHorizontalMinInertia or 0.65
+            @infiniteScroll = infScroll or false
 
             threshold           = 20
             isVerticalScroll    = false
@@ -336,7 +335,7 @@ lcTouch.factory '$ngDragSwipeHorizontal', ['$swipe', '$timeout', ($swipe, $timeo
             xStart              = null
             yStart              = null
 
-            onstart = (el, amounts, e)->
+            onstart = (el, amounts, e)=>
                 e.stopPropagation()
 
                 isVerticalScroll    = false
@@ -346,30 +345,33 @@ lcTouch.factory '$ngDragSwipeHorizontal', ['$swipe', '$timeout', ($swipe, $timeo
 
                 $(e.currentTarget).data('touchStart', { x: amounts[0], y: amounts[1], timeStamp: e.timeStamp })
 
-            onend = (el, amounts, e)->
+            onend = (el, amounts, e)=>
                 e.stopPropagation()
 
                 startEvent      = $(e.currentTarget).data('touchStart')
-                x1              = self.offset*self.wrapperWidth
-                x2              = Math.abs(parseInt($(self.elem.children()[self.offset]).css('x')))
+                x1              = @offset*@wrapperWidth
+                x2              = Math.abs(parseInt($(@elem.children()[@offset]).css('x')))
                 distanceMoved   = x1 - x2
                 speed           = Math.abs(Math.max(Math.min((x2 - x1) / Math.max(e.timeStamp - startEvent.timeStamp, 1), 1), -1))
 
-                if distanceMoved < 0 and (Math.abs(distanceMoved) >= self.minDistance or speed >= self.minInertia) and self.totalChildren isnt self.offset+1
-                    self.offset++
-                else if distanceMoved > 0 and (Math.abs(distanceMoved) >= self.minDistance or speed >= self.minInertia) and self.offset isnt 0
-                    self.offset--
+                if distanceMoved < 0 and (Math.abs(distanceMoved) >= @minDistance or speed >= @minInertia) and @totalChildren isnt @offset+1
+                    @offset++
+                    scope.$broadcast 'event:lcCarouselNext'
+
+                else if distanceMoved > 0 and (Math.abs(distanceMoved) >= @minDistance or speed >= @minInertia) and @offset isnt 0
+                    @offset--
+                    scope.$broadcast 'event:lcCarouselPrevious'
 
                 if distanceMoved != 0
                     time = 500 - 500*((75*speed)/100)
 
-                    $(self.movable).transition({ x: self.offset*(-self.wrapperWidth)+'px' }, time, 'out')
-                    $timeout ()->
-                        $(notInArray(self.elem.children(), self.movable)).css { x: self.offset*(-self.wrapperWidth)+'px' }
-                        if self.infiniteScroll then self.resetOrder(self.elem, attrs)
+                    $(@movable).transition({ x: @offset*(-@wrapperWidth)+'px' }, time, 'out')
+                    $timeout ()=>
+                        $(notInArray(@elem.children(), @movable)).css { x: @offset*(-@wrapperWidth)+'px' }
+                        @resetOrder(@elem, attrs) if @infiniteScroll
                     , time
 
-            onmove = (el, amounts, e)->
+            onmove = (el, amounts, e)=>
                 e.stopPropagation()
 
                 isVerticalScroll    = true if Math.abs(yStart - amounts[1]) > threshold and not isHorizontalScroll
@@ -380,67 +382,61 @@ lcTouch.factory '$ngDragSwipeHorizontal', ['$swipe', '$timeout', ($swipe, $timeo
                 e.preventDefault() # Stop vertical scroll
 
                 startEvent = $(e.currentTarget).data('touchStart')
-                placement  = amounts[0]-startEvent.x+self.offset*(-self.wrapperWidth)
+                placement  = amounts[0]-startEvent.x+@offset*(-@wrapperWidth)
 
-                if placement <= 0 and placement >= (self.totalChildren-1)*(-self.wrapperWidth)
-                    self.movable = cleanArray([self.elem.children()[self.offset], self.elem.children()[self.offset-1], self.elem.children()[self.offset+1]])
+                if placement <= 0 and placement >= (@totalChildren-1)*(-@wrapperWidth)
+                    @movable = cleanArray([@elem.children()[@offset], @elem.children()[@offset-1], @elem.children()[@offset+1]])
 
-                    $(self.movable).css { x: placement+'px' }
+                    $(@movable).css { x: placement+'px' }
 
                 scope.$broadcast 'event:lcCarouselStopAutoScroll'
 
 
-            if self.infiniteScroll then self.resetOrder()
-            $swipe.bind self.elem.children(), { move: onmove, start: onstart, end: onend }
+            if @infiniteScroll then @resetOrder()
+            $swipe.bind @elem.children(), { move: onmove, start: onstart, end: onend }
 
 
         resetOrder: ()->
-            self = @
+            if @elem.children().length > 2
+                if @offset is 0 and @infiniteScroll
+                    @elem.prepend @elem.children().last()
+                    @offset = 1
+                else if @offset > 1 and @infiniteScroll
+                    @elem.append @elem.children().first()
+                    @offset = 1
 
-            if self.elem.children().length > 2
-                if self.offset is 0 and self.infiniteScroll
-                    self.elem.prepend self.elem.children().last()
-                    self.offset = 1
-                else if self.offset > 1 and self.infiniteScroll
-                    self.elem.append self.elem.children().first()
-                    self.offset = 1
-
-                $(self.elem.children()).css { x: self.offset*(-self.wrapperWidth)+'px' }
+                $(@elem.children()).css { x: @offset*(-@wrapperWidth)+'px' }
 
 
         next: ()->
-            self = @
+            if @animating then return
 
-            if self.animating then return
-
-            self.offset++
+            @offset++
             time = 500
-            self.animating = true
+            @animating = true
 
-            self.movable = cleanArray([self.elem.children()[self.offset], self.elem.children()[self.offset-1], self.elem.children()[self.offset+1]])
-            $(self.movable).transition({ x: self.offset*(-self.wrapperWidth)+'px' }, time, 'out')
+            @movable = cleanArray([@elem.children()[@offset], @elem.children()[@offset-1], @elem.children()[@offset+1]])
+            $(@movable).transition({ x: @offset*(-@wrapperWidth)+'px' }, time, 'out')
 
-            $timeout ()->
-                if self.infiniteScroll then self.resetOrder()
-                self.animating = false
+            $timeout ()=>
+                if @infiniteScroll then @resetOrder()
+                @animating = false
             , time
 
 
         previous: ()->
-            self = @
+            if @animating then return
 
-            if self.animating then return
-
-            self.offset--
+            @offset--
             time = 500
-            self.animating = true
+            @animating = true
 
-            self.movable = cleanArray([self.elem.children()[self.offset], self.elem.children()[self.offset-1], self.elem.children()[self.offset+1]])
-            $(self.movable).transition({ x: self.offset*(-self.wrapperWidth)+'px' }, time, 'out')
+            @movable = cleanArray([@elem.children()[@offset], @elem.children()[@offset-1], @elem.children()[@offset+1]])
+            $(@movable).transition({ x: @offset*(-@wrapperWidth)+'px' }, time, 'out')
 
-            $timeout ()->
-                if self.infiniteScroll then self.resetOrder()
-                self.animating = false
+            $timeout ()=>
+                if @infiniteScroll then @resetOrder()
+                @animating = false
             , time
 
 
@@ -484,8 +480,12 @@ lcTouch.directive 'lcCarouselHorizontal', ['$ngDragSwipeHorizontal', '$compile',
             scope.itemsRendered = ()->
                 $timeout start, 100
 
+            scope.backgroundImage = (img)->
+                'url(\"'+img+'\")'
+
             start = ()->
-                $dsh.bind scope, elem, attrs, true
+                infiniteScroll = elem.children().length > 2
+                $dsh.bind scope, elem, attrs, infiniteScroll
 
                 $parent = elem.parent()
                 forceArrows = attrs.forceArrows
@@ -499,7 +499,7 @@ lcTouch.directive 'lcCarouselHorizontal', ['$ngDragSwipeHorizontal', '$compile',
                     height: $parent.height()
 
 
-                lArrow = $('<div class="arrow" ng-tap="prevCarouselSlide()" />').css
+                lArrow = $('<div class="arrow left" ng-tap="prevCarouselSlide()" />').css
                     position: 'absolute'
                     top: 0
                     left: 0
@@ -510,7 +510,7 @@ lcTouch.directive 'lcCarouselHorizontal', ['$ngDragSwipeHorizontal', '$compile',
                 .append '<i class="icon-chevron-sign-left"></i>'
 
 
-                rArrow = $('<div class="arrow" ng-tap="nextCarouselSlide()" />').css
+                rArrow = $('<div class="arrow right" ng-tap="nextCarouselSlide()" />').css
                     position: 'absolute'
                     top: 0
                     right: 0
@@ -538,9 +538,11 @@ lcTouch.directive 'lcCarouselHorizontal', ['$ngDragSwipeHorizontal', '$compile',
                 $timeout ()->
                     $dsh.resetOrder()
 
-                    if elem.children().length > 2
-                        $parent.append $compile(lArrow)(scope)
-                        $parent.append $compile(rArrow)(scope)
+                    $parent.append $compile(lArrow)(scope)
+                    $parent.append $compile(rArrow)(scope)
+
+                    unless infiniteScroll
+                        $parent.find('.arrow.left').css 'display', 'none'
 
                     elem.animate { opacity: 1 }, 300
 
@@ -551,12 +553,12 @@ lcTouch.directive 'lcCarouselHorizontal', ['$ngDragSwipeHorizontal', '$compile',
 
                 # Functions
                 autoScroll = ()->
+                    return if elem.children().length < 3
+
                     $timeout.cancel autoScrollTimeout
                     scope.nextCarouselSlide(false)
 
                     autoScrollTimeout = $timeout autoScroll, autoScrollUntilClick
-
-
 
                 # Scope Functions
                 scope.nextCarouselSlide = (cancelAutoScroll)->
@@ -564,6 +566,10 @@ lcTouch.directive 'lcCarouselHorizontal', ['$ngDragSwipeHorizontal', '$compile',
 
                     if cancelAutoScroll
                         $timeout.cancel autoScrollTimeout
+
+                    unless infiniteScroll
+                        $parent.find('.arrow.left').fadeIn()
+                        $parent.find('.arrow.right').fadeOut()
 
                     $timeout ()->
                         $dsh.next()
@@ -576,13 +582,29 @@ lcTouch.directive 'lcCarouselHorizontal', ['$ngDragSwipeHorizontal', '$compile',
                     if cancelAutoScroll
                         $timeout.cancel autoScrollTimeout
 
+                    unless infiniteScroll
+                        $parent.find('.arrow.left').fadeOut()
+                        $parent.find('.arrow.right').fadeIn()
+
                     $timeout ()->
                         $dsh.previous()
                         if cancelAutoScroll then scope.$emit('event:lcCarouselPrevious', elem)
                     , 1
 
-                scope.$on 'event:lcCarouselStopAutoScroll', (e)->
+
+                scope.$on 'event:lcCarouselStopAutoScroll', (e)=>
                     $timeout.cancel autoScrollTimeout
+
+
+                scope.$on 'event:lcCarouselNext', (e)=>
+                    unless infiniteScroll
+                        $parent.find('.arrow.left').fadeIn()
+                        $parent.find('.arrow.right').fadeOut()
+
+                scope.$on 'event:lcCarouselPrevious', (e)=>
+                    unless infiniteScroll
+                        $parent.find('.arrow.left').fadeOut()
+                        $parent.find('.arrow.right').fadeIn()
 
 
 

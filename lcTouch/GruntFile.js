@@ -46,22 +46,12 @@ module.exports = function(grunt) {
 					'dist/lc-touch.min.js': 'dist/lc-touch.js'
 				}
 			}
-		},
-
-		bump: {
-		    options: {
-        		files: ['package.json'],
-        		updateConfigs: ['pkg'],
-        		commit: false,
-        		createTag: false,
-        		push: false
-            }
 		}
 	});
 
 	grunt.loadNpmTasks('grunt-contrib-coffee');
 	grunt.loadNpmTasks('grunt-contrib-uglify');
-	grunt.loadNpmTasks('grunt-bump');
+	grunt.loadNpmTasks('grunt-vbump');
 
 
 	grunt.registerTask('build', ['coffee','uglify:normal','uglify:min']);
